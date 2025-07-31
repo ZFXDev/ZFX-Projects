@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detector de Dispositivos</title>
+    <title>Acceso a la Página</title>
     <style>
         /* Fondo completamente negro */
         body {
@@ -11,15 +11,17 @@
             color: white; /* Texto blanco para que sea visible en el fondo negro */
             font-family: sans-serif; /* Fuente simple */
             display: flex;
+            flex-direction: column; /* Organiza los elementos en columna */
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
             text-align: center; /* Centrar el texto */
         }
-        /* Estilo para el contenedor del mensaje, simple y centrado */
-        #message {
+        /* Estilo para el contenedor del mensaje */
+        #message-container {
             padding: 20px;
+            margin-bottom: 20px; /* Espacio debajo del texto */
         }
         h1 {
             font-size: 2em; /* Tamaño de fuente para el título */
@@ -28,44 +30,72 @@
         p {
             font-size: 1.2em; /* Tamaño de fuente para el párrafo */
         }
+        /* Estilos para los botones */
+        .button-container {
+            display: flex;
+            flex-direction: column; /* Botones en columna por defecto */
+            gap: 15px; /* Espacio entre los botones */
+            width: 80%; /* Ancho de los botones */
+            max-width: 300px; /* Ancho máximo para que no sean demasiado grandes en pantallas anchas */
+        }
+        .action-button {
+            background-color: #4CAF50; /* Color verde para el botón principal */
+            color: white;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.3s ease;
+        }
+        .action-button:hover {
+            background-color: #45a049;
+        }
+        /* Estilo específico para el botón de cerrar */
+        #closeButton {
+            background-color: #f44336; /* Color rojo para el botón de cerrar */
+        }
+        #closeButton:hover {
+            background-color: #da190b;
+        }
+
+        /* Media query para hacer los botones horizontales en pantallas más grandes */
+        @media (min-width: 600px) {
+            .button-container {
+                flex-direction: row; /* Botones en fila en pantallas más grandes */
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
-    <div id="message">
-        <h1>Cargando...</h1>
-        <p>Detectando tu dispositivo.</p>
+    <div id="message-container">
+        <h1>Esta página solo funciona con una Computadora.</h1>
+        <p>Por favor, confirma tu tipo de dispositivo para continuar.</p>
+    </div>
+
+    <div class="button-container">
+        <button id="computerButton" class="action-button">Estoy en una computadora</button>
+        <button id="closeButton" class="action-button">No estoy en una computadora</button>
     </div>
 
     <script>
-        // Función para detectar si el dispositivo es móvil
-        function isMobile() {
-            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-            return /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|l(a|ti))|s(im|phone|z500)|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(userAgent) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|r\-)|al(av|ca|co)|amoi|an(di|te)|ki|az(z|w)|baca|bl(eq|az)|br(v|aw)|bumb|bw(g|n)|c55a|cdm|chtm|cldc|cmd|co(mp|nd)|craw|da(on|sk)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|d)|el(ai|em)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gf\-5|gi(mo|on)|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|on)|i230|iac( |\/|f)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|5)|ul|us)|lk\-s|lt(t|m)\-|m1ug|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|op)|mm(10|18|20|22|30|32|65|66|70|71|72|75|81|83|85|98)|moba|mo(bi|da|de|nd|s|t)|mwbp|n10[02]|n200|n300|n500|n7(7|0)|ne((c|m)\-|on|tf|v)|ng(0|1)|nk(f|n)|ny(05|m)|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|([1-8]|c))|pl(ay|w)|pn\-2|po(ny|cv)|pw(ar|sm)|re(an|ce)|rich|rmd(i|m)|ry(z4|6[1-8])|s(h(ar|mo)|oo)|sa(jo|ti)|sane|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|te)|so(kl|in)|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|10|6)i|tt(iz|o|sh)|tx\-9|up(\.b|g|m)|un\-x|v(ate|l)|vow|vg(a|h)|wi(ce|st)|wrg0|wt(c|p)|x700|yas\-|your|zeto|zte\-/i.test(userAgent.substr(0, 4));
-        }
+        // Obtener referencias a los botones
+        const computerButton = document.getElementById('computerButton');
+        const closeButton = document.getElementById('closeButton');
 
-        // Ejecutar la lógica al cargar la página
-        window.onload = function() {
-            const messageElement = document.getElementById('message');
-            const redirectDelay = 3000; // 3000 milisegundos = 3 segundos
+        // Función para manejar el clic en "Estoy en una computadora"
+        computerButton.addEventListener('click', () => {
+            window.location.href = "hub.html"; // Redirige a hub.html
+        });
 
-            if (isMobile()) {
-                // Si es un dispositivo móvil, mostrar el mensaje
-                messageElement.innerHTML = `
-                    <h1>Acceso Restringido</h1>
-                    <p>No puedes unirte desde un dispositivo móvil.</p>
-                `;
-            } else {
-                // Si no es móvil (se asume que es una PC), mostrar mensaje y luego redirigir
-                messageElement.innerHTML = `
-                    <h1>Redirigiendo...</h1>
-                    <p>Grandes cosas estan por pasar :).</p>
-                `;
-                // Redirige después del retraso especificado
-                setTimeout(() => {
-                    window.location.href = "hub.html";
-                }, redirectDelay);
-            }
-        };
+        // Función para manejar el clic en "No estoy en una computadora"
+        closeButton.addEventListener('click', () => {
+            // Intenta cerrar la ventana. Nota: Los navegadores modernos tienen restricciones de seguridad
+            // y a menudo solo permiten cerrar ventanas que fueron abiertas por script.
+            // Si la ventana no se cierra, el usuario tendrá que cerrarla manualmente.
+            window.close();
+        });
     </script>
 </body>
 </html>
