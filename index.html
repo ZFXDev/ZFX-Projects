@@ -3,99 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso a la Página</title>
+    <title>ZFX Projects</title>
     <style>
-        /* Fondo completamente negro */
         body {
-            background-color: black;
-            color: white; /* Texto blanco para que sea visible en el fondo negro */
-            font-family: sans-serif; /* Fuente simple */
-            display: flex;
-            flex-direction: column; /* Organiza los elementos en columna */
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            font-family: Arial, sans-serif;
             margin: 0;
-            text-align: center; /* Centrar el texto */
+            background-color: #f0f2f5;
+            color: #333;
         }
-        /* Estilo para el contenedor del mensaje */
-        #message-container {
-            padding: 20px;
-            margin-bottom: 20px; /* Espacio debajo del texto */
-        }
-        h1 {
-            font-size: 2em; /* Tamaño de fuente para el título */
-            margin-bottom: 10px;
-        }
-        p {
-            font-size: 1.2em; /* Tamaño de fuente para el párrafo */
-        }
-        /* Estilos para los botones */
-        .button-container {
-            display: flex;
-            flex-direction: column; /* Botones en columna por defecto */
-            gap: 15px; /* Espacio entre los botones */
-            width: 80%; /* Ancho de los botones */
-            max-width: 300px; /* Ancho máximo para que no sean demasiado grandes en pantallas anchas */
-        }
-        .action-button {
-            background-color: #4CAF50; /* Color verde para el botón principal */
+        header {
+            background-color: #333;
             color: white;
-            padding: 15px 25px;
+            padding: 1rem;
+            text-align: center;
+        }
+        nav {
+            background-color: #444;
+            padding: 0.5rem;
+            text-align: center;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1.5rem;
+            margin: 0 0.5rem;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        nav a:hover, .nav-link.active {
+            background-color: #555;
+        }
+        #content-frame {
+            width: 100%;
+            height: calc(100vh - 120px); /* Ajusta la altura para que no se superponga con la cabecera y navegación */
             border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1.1em;
-            transition: background-color 0.3s ease;
-        }
-        .action-button:hover {
-            background-color: #45a049;
-        }
-        /* Estilo específico para el botón de cerrar */
-        #closeButton {
-            background-color: #f44336; /* Color rojo para el botón de cerrar */
-        }
-        #closeButton:hover {
-            background-color: #da190b;
-        }
-
-        /* Media query para hacer los botones horizontales en pantallas más grandes */
-        @media (min-width: 600px) {
-            .button-container {
-                flex-direction: row; /* Botones en fila en pantallas más grandes */
-                justify-content: center;
-            }
+            display: block;
         }
     </style>
 </head>
 <body>
-    <div id="message-container">
-        <h1>Esta página solo funciona con una Computadora.</h1>
-        <p>Por favor, confirma tu tipo de dispositivo para continuar.</p>
-    </div>
 
-    <div class="button-container">
-        <button id="computerButton" class="action-button">Estoy en una computadora</button>
-        <button id="closeButton" class="action-button">No estoy en una computadora</button>
-    </div>
+    <header>
+        <h1>ZFX Projects</h1>
+    </header>
+
+    <nav>
+	    <a href="javascript:void(0);" class="nav-link" onclick="loadContent('news.html', this)">Novedades</a>
+        <a href="javascript:void(0);" class="nav-link" onclick="loadContent('games.html', this)">Juegos</a>
+        <a href="javascript:void(0);" class="nav-link" onclick="loadContent('programs.html', this)">Programas</a>
+        <a href="javascript:void(0);" class="nav-link" onclick="loadContent('others.html', this)">Otros</a>
+		<a href="javascript:void(0);" class="nav-link" onclick="loadContent('info.html', this)">Información</a>
+		<a href="javascript:void(0);" class="nav-link" onclick="loadContent('tools.html', this)">Dev Tools</a>
+    </nav>
+
+    <iframe id="content-frame" src="juegos.html"></iframe>
 
     <script>
-        // Obtener referencias a los botones
-        const computerButton = document.getElementById('computerButton');
-        const closeButton = document.getElementById('closeButton');
+        function loadContent(page, element) {
+            // Cambia la página que se muestra en el iframe
+            document.getElementById('content-frame').src = page;
 
-        // Función para manejar el clic en "Estoy en una computadora"
-        computerButton.addEventListener('click', () => {
-            window.location.href = "hub.html"; // Redirige a hub.html
-        });
+            // Gestiona la clase 'active' para resaltar el enlace actual
+            const links = document.querySelectorAll('.nav-link');
+            links.forEach(link => link.classList.remove('active'));
+            element.classList.add('active');
+        }
 
-        // Función para manejar el clic en "No estoy en una computadora"
-        closeButton.addEventListener('click', () => {
-            // Intenta cerrar la ventana. Nota: Los navegadores modernos tienen restricciones de seguridad
-            // y a menudo solo permiten cerrar ventanas que fueron abiertas por script.
-            // Si la ventana no se cierra, el usuario tendrá que cerrarla manualmente.
-            window.close();
+        // Carga el contenido inicial y activa el primer enlace
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelector('.nav-link').click();
         });
     </script>
+
 </body>
 </html>
