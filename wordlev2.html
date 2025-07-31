@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Wordle</title>
+  <style>
+    :root {
+      --color-bg: #121213;
+      --color-cell-border: #3a3a3c;
+      --color-absent: #3a3a3c;
+      --color-present: #b59f3b;
+      --color-correct: #538d4e;
+      --color-text: #ffffff;
+      --cell-size: 60px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    h1 {
+      margin: 20px 0;
+      font-size: 2.5em;
+      letter-spacing: 2px;
+    }
+
+    #board {
+      display: grid;
+      grid-template-rows: repeat(6, var(--cell-size));
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, var(--cell-size));
+      gap: 10px;
+    }
+
+    .cell {
+      width: var(--cell-size);
+      height: var(--cell-size);
+      border: 2px solid var(--color-cell-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2em;
+      font-weight: bold;
+      text-transform: uppercase;
+      background-color: transparent;
+      color: white;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .correct {
+      background-color: var(--color-correct);
+    }
+
+    .present {
+      background-color: var(--color-present);
+    }
+
+    .absent {
+      background-color: var(--color-absent);
+    }
+
+    input[type="text"] {
+      font-size: 1.2em;
+      padding: 10px;
+      width: 160px;
+      text-align: center;
+      border-radius: 8px;
+      border: 2px solid #555;
+      background-color: #222;
+      color: white;
+      outline: none;
+      text-transform: uppercase;
+    }
+
+    input[type="text"]:focus {
+      border-color: #888;
+    }
+
+    button {
+      margin: 10px 5px 0 5px;
+      padding: 10px 20px;
+      font-size: 1em;
+      border: none;
+      background-color: #538d4e;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #6aaa64;
+    }
+
+    #message {
+      margin-top: 15px;
+      font-size: 1.1em;
+      min-height: 24px;
+      text-align: center;
+    }
+
+    @media (max-width: 500px) {
+      :root {
+        --cell-size: 45px;
+      }
+
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Wordle</h1>
+
+  <div id="board"></div>
+
+  <input type="text" id="guessInput" maxlength="5" autofocus placeholder="Palabra..." />
+  <div>
+    <button onclick="makeGuess()">Probar</button>
+    <button onclick="resetGame()">Reiniciar</button>
+  </div>
+
+  <div id="message"></div>
+
+  <script>
+    const WORDS = ["LUCES", "CASAS", "PERRO", "FELIZ", "NUBES", "RISAS", "NIEVE"];
+    let secretWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+    const board = document.getElementById("board");
+    const maxTries = 6;
+    let currentTry = 0;
+    let isGameOver = false;
+
+    // Crear tablero inicial
+    for (let i = 0; i < maxTries; i++) {
+      const row = document.createElement("div");
+      row.className = "grid";
+      for (let j = 0; j < 5; j++) {
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        row.appendChild(cell);
+      }
+      board.appendChild(row);
+    }
+
+    function makeGuess() {
+      if (isGameOver) return;
+
+      const input = document.getElementById("guessInput");
+      const guess = input.value.toUpperCase();
+
+      if (guess.length !== 5) {
+        showMessage("Debe tener 5 letras.");
+        return;
+      }
+
+      const row = board.children[currentTry].children;
+      const letterCount = {};
+      for (let letter of secretWord) {
+        letterCount[letter] = (letterCount[letter] || 0) + 1;
+      }
+
+      for (let i = 0; i < 5; i++) {
+        const cell = row[i];
+        cell.textContent = guess[i];
+        if (guess[i] === secretWord[i]) {
+          cell.classList.add("correct");
+          letterCount[guess[i]]--;
+        }
+      }
+
+      for (let i = 0; i < 5; i++) {
+        const cell = row[i];
+        if (cell.classList.contains("correct")) continue;
+        if (secretWord.includes(guess[i]) && letterCount[guess[i]] > 0) {
+          cell.classList.add("present");
+          letterCount[guess[i]]--;
+        } else {
+          cell.classList.add("absent");
+        }
+      }
+
+      if (guess === secretWord) {
+        showMessage("¡Correcto! 🎉");
+        isGameOver = true;
+        return;
+      }
+
+      currentTry++;
+      if (currentTry >= maxTries) {
+        showMessage(`Perdiste. La palabra era: ${secretWord}`);
+        isGameOver = true;
+      } else {
+        input.value = "";
+        input.focus();
+        showMessage("");
+      }
+    }
+
+    function resetGame() {
+      currentTry = 0;
+      isGameOver = false;
+      secretWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+      document.getElementById("message").textContent = "";
+      document.getElementById("guessInput").value = "";
+      document.getElementById("guessInput").focus();
+
+      const allCells = board.querySelectorAll(".cell");
+      allCells.forEach(cell => {
+        cell.textContent = "";
+        cell.className = "cell";
+      });
+    }
+
+    function showMessage(msg) {
+      document.getElementById("message").textContent = msg;
+    }
+  </script>
+</body>
+</html>

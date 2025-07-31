@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Wordle Lite</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    .letter {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      margin: 5px;
+      font-size: 24px;
+      line-height: 40px;
+      text-transform: uppercase;
+      border: 2px solid #ccc;
+    }
+    .correct {
+      background-color: green;
+      color: white;
+    }
+    .present {
+      background-color: goldenrod;
+      color: white;
+    }
+    .absent {
+      background-color: gray;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h1>Wordle Lite</h1>
+  <input type="text" id="guessInput" maxlength="5" placeholder="Escribe palabra de 5 letras">
+  <button onclick="checkGuess()">Adivinar</button>
+  <div id="result"></div>
+
+  <script>
+    const secretWord = "feliz"; // Cambia esto por una palabra aleatoria si quieres
+    const resultDiv = document.getElementById("result");
+
+    function checkGuess() {
+      const input = document.getElementById("guessInput");
+      const guess = input.value.toLowerCase();
+
+      if (guess.length !== 5) {
+        alert("La palabra debe tener 5 letras.");
+        return;
+      }
+
+      resultDiv.innerHTML = ""; // Limpiar resultado anterior
+
+      for (let i = 0; i < 5; i++) {
+        const letterDiv = document.createElement("div");
+        letterDiv.classList.add("letter");
+
+        if (guess[i] === secretWord[i]) {
+          letterDiv.classList.add("correct");
+        } else if (secretWord.includes(guess[i])) {
+          letterDiv.classList.add("present");
+        } else {
+          letterDiv.classList.add("absent");
+        }
+
+        letterDiv.textContent = guess[i];
+        resultDiv.appendChild(letterDiv);
+      }
+
+      if (guess === secretWord) {
+        alert("¡Correcto! Has adivinado la palabra.");
+      }
+
+      input.value = "";
+    }
+  </script>
+</body>
+</html>
