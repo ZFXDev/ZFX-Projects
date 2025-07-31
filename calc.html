@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora</title>
+    <!-- Incluye Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilos personalizados para la fuente y el cuerpo */
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f2f5; /* Un gris claro para el fondo */
+        }
+        /* Asegura que el contenedor de la calculadora se centre */
+        .calculator-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="calculator-container">
+        <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm">
+            <!-- Pantalla de la calculadora -->
+            <input type="text" id="display" class="w-full h-16 text-right text-4xl mb-4 px-4 py-2 rounded-lg bg-gray-200 border-2 border-gray-300 focus:outline-none focus:border-blue-500 transition duration-300 ease-in-out" readonly value="0">
+
+            <!-- Botones de la calculadora -->
+            <div class="grid grid-cols-4 gap-3">
+                <!-- Fila 1 -->
+                <button class="col-span-2 bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-xl text-2xl shadow-md transform hover:scale-105 transition duration-200 ease-in-out" onclick="clearDisplay()">C</button>
+                <button class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-4 rounded-xl text-2xl shadow-md transform hover:scale-105 transition duration-200 ease-in-out" onclick="appendToDisplay('/')">/</button>
+                <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 rounded-xl text-2xl shadow-md transform hover:scale-105 transition duration-200 ease-in-out" onclick="appendToDisplay('*')">*</button>
+
+                <!-- Fila 2 -->
+                <button class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-4 rounded-xl text-2xl shadow-md transform hover:scale-105 transition duration-200 ease-in-out" onclick="appendToDisplay('7')">7</button>
+                <button class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-4 rounded-xl text-2xl shadow-md transform hover:scale-105 transition duration-200 ease-in-out" onclick="appendToDisplay('8')">8</button>
+                <button class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-4 rounded-xl text-2xl shadow-md transform hover:scale-105 transition duration-200 ease-in-out" onclick="appendToDisplay('9')">9</button>
+                <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 rounded-xl text-2xl shadow-md transform hover:scale-105 transition duration-200 ease-in-out" onclick="appendToDisplay('-')">-</button>
+
+                <!-- Fila 3 -->
+                <button class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-4 rounded-xl text-2xl shadow-md transform hover:scale-105 transition duration-200 ease-in-out" onclick="appendToDisplay('4')">4</button>
+                <button class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-4 rounded-xl text-2xl shadow-md transform hover:scale-105 transition duration-200 ease-in-out" onclick="appendToDisplay('5')">5</button>
+                <button class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-4 rounded-xl text-2xl shadow-md transform hover:scale-105 transition duration-200 ease-in-out" onclick="appendToDisplay('6')">6</button>
+                <button class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 rounded-xl text-2xl shadow-md transform hover:scale-105 transition duration-200 ease-in-out" onclick="appendToDisplay('+')">+</button>
+
+                <!-- Fila 4 -->
+                <button class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-4 rounded-xl text-2xl shadow-md transform hover:scale-105 transition duration-200 ease-in-out" onclick="appendToDisplay('1')">1</button>
+                <button class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-4 rounded-xl text-2xl shadow-md transform hover:scale-105 transition duration-200 ease-in-out" onclick="appendToDisplay('2')">2</button>
+                <button class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-4 rounded-xl text-2xl shadow-md transform hover:scale-105 transition duration-200 ease-in-out" onclick="appendToDisplay('3')">3</button>
+                <button class="row-span-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl text-2xl shadow-md transform hover:scale-105 transition duration-200 ease-in-out" onclick="calculate()">=</button>
+
+                <!-- Fila 5 -->
+                <button class="col-span-2 bg-gray-700 hover:bg-gray-800 text-white font-bold py-4 rounded-xl text-2xl shadow-md transform hover:scale-105 transition duration-200 ease-in-out" onclick="appendToDisplay('0')">0</button>
+                <button class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-4 rounded-xl text-2xl shadow-md transform hover:scale-105 transition duration-200 ease-in-out" onclick="appendToDisplay('.')">.</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Obtiene el elemento de la pantalla de la calculadora
+        const display = document.getElementById('display');
+        let currentInput = '0'; // Almacena la entrada actual del usuario
+        let operator = null; // Almacena el operador seleccionado
+        let firstOperand = null; // Almacena el primer operando
+
+        // Función para añadir valores a la pantalla
+        function appendToDisplay(value) {
+            // Si la pantalla muestra '0' o 'Error', reemplázalo
+            if (display.value === '0' || display.value === 'Error') {
+                display.value = value;
+            } else {
+                // Evita múltiples puntos decimales en un número
+                if (value === '.' && display.value.includes('.')) {
+                    return;
+                }
+                display.value += value;
+            }
+            currentInput = display.value; // Actualiza la entrada actual
+        }
+
+        // Función para limpiar la pantalla
+        function clearDisplay() {
+            display.value = '0';
+            currentInput = '0';
+            operator = null;
+            firstOperand = null;
+        }
+
+        // Función para calcular el resultado
+        function calculate() {
+            try {
+                // Evalúa la expresión matemática en la pantalla
+                // Usa eval() con precaución en aplicaciones reales, aquí es para simplicidad
+                let result = eval(display.value);
+
+                // Manejo de resultados infinitos (división por cero)
+                if (!isFinite(result)) {
+                    display.value = 'Error';
+                } else {
+                    display.value = result;
+                }
+            } catch (error) {
+                // Muestra 'Error' si la expresión es inválida
+                display.value = 'Error';
+            }
+            currentInput = display.value; // Actualiza la entrada actual con el resultado
+            operator = null; // Reinicia el operador
+            firstOperand = null; // Reinicia el primer operando
+        }
+    </script>
+</body>
+</html>
