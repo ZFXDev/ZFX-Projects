@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Último Forajido del Oeste</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&display=swap');
+        body {
+            font-family: 'Merriweather', serif;
+            background: #2b231c; /* Tono marrón oscuro */
+            color: #d4c1a5; /* Color crema/sepia para el texto */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .game-container {
+            max-width: 960px;
+            width: 100%;
+            background-color: #4b3d2f; /* Fondo de madera oscura */
+            border: 4px solid #8c7853; /* Borde de madera clara */
+        }
+        .story-text {
+            line-height: 1.8;
+            font-size: 1.125rem; /* text-lg */
+        }
+        .choices-container button {
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+            text-align: left;
+        }
+        .choices-container button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+            background-color: #8c7853; /* Color de borde para el hover */
+            color: #2b231c;
+        }
+        .logo-text {
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="game-container rounded-lg shadow-2xl p-8 md:p-12">
+        <h1 class="text-5xl font-bold text-center mb-6 tracking-wide logo-text text-yellow-500">El Último Forajido del Oeste</h1>
+        <hr class="border-yellow-600 mb-8">
+        
+        <div id="story-text" class="story-text mb-8 overflow-y-auto max-h-[60vh] md:max-h-[70vh]">
+            <!-- El texto de la historia se cargará aquí -->
+        </div>
+
+        <div id="choices-container" class="choices-container grid grid-cols-1 gap-4 mt-8">
+            <!-- Los botones de elecciones se cargarán aquí -->
+        </div>
+
+    </div>
+
+    <script>
+        // Objeto que contiene todas las escenas del juego y sus opciones.
+        const story = {
+            'start': {
+                text: "Hace unos años, formabas parte de la banda de Dutch Van der Linde, pero la traición y la desconfianza te llevaron a dejar esa vida. Ahora, con un nuevo nombre, intentas empezar de cero, pero el pasado tiene una forma de alcanzarte. Un viejo conocido de la banda te encuentra, malherido, y te pide ayuda para un último robo, el 'trabajo que lo cambiará todo'.",
+                choices: [
+                    { text: "Aceptar el trabajo para ayudar a tu viejo amigo.", nextSceneId: 'escena1_aceptar_robo' },
+                    { text: "Rechazarlo y decirle que no volverás a la vida criminal.", nextSceneId: 'escena1_rechazar_robo' },
+                    { text: "Robar a tu viejo amigo y huir con el dinero que lleva.", nextSceneId: 'final_traicion' },
+                    { text: "Buscar la ayuda de la ley para que lo capturen y así tú ser libre.", nextSceneId: 'final_traicion_ley' }
+                ]
+            },
+            'escena1_aceptar_robo': {
+                text: "Aceptas ayudar a tu amigo. Te explica que el robo es a un tren del gobierno, y que la recompensa es enorme. Te pones en marcha con la promesa de que, después de esto, ambos podrán vivir una vida tranquila. El tren es asaltado, pero un misterioso agente del gobierno, que te reconoce, te persigue sin descanso.",
+                choices: [
+                    { text: "Luchar contra el agente y asegurar tu libertad.", nextSceneId: 'escena2_enfrentar_agente' },
+                    { text: "Huir del agente y dejar que tu amigo se encargue de él.", nextSceneId: 'final_huida' },
+                    { text: "Entregar a tu amigo al agente a cambio de tu libertad.", nextSceneId: 'final_traicion_agente' },
+                    { text: "Matar al agente y desaparecer para siempre.", nextSceneId: 'final_muerte_agente' }
+                ]
+            },
+            'escena1_rechazar_robo': {
+                text: "Rechazas el trabajo, y tu amigo se va con el corazón roto. Unos días después, recibes una carta de tu esposa, que te pide que la rescates de un grupo de bandidos que la han secuestrado. Los bandidos son los mismos con los que tu amigo planeaba robar el tren. Ahora, la única forma de salvar a tu esposa es volver a la vida de forajido.",
+                choices: [
+                    { text: "Ir a rescatar a tu esposa, solo y sin ayuda.", nextSceneId: 'escena2_rescate' },
+                    { text: "Buscar la ayuda de la ley para que la rescaten.", nextSceneId: 'final_ley' },
+                    { text: "Negociar con los bandidos para que la liberen.", nextSceneId: 'final_negociar_bandidos' },
+                    { text: "Huir de la ciudad y dejar a tu esposa atrás.", nextSceneId: 'final_huida_esposa' }
+                ]
+            },
+            'escena2_enfrentar_agente': {
+                text: "Luchas contra el agente. Es un hombre de honor y un pistolero excepcional, pero tu experiencia en la vida de forajido te da una ventaja. Lo vences y te deja vivir, a cambio de que le ayudes a capturar a los últimos forajidos de la banda de Dutch. Te das cuenta de que el mundo está cambiando y que tu única opción es adaptarte o morir.",
+                choices: [
+                    { text: "Aceptar el trato y unirte al agente.", nextSceneId: 'final_nuevo_trabajo' },
+                    { text: "Negarte y matarlo para asegurar tu libertad.", nextSceneId: 'final_asesinato' },
+                    { text: "Huir del agente y dejar que te persiga.", nextSceneId: 'final_huida' },
+                    { text: "Confrontar a tu amigo y pedirle que te ayude a escapar.", nextSceneId: 'final_confrontar_amigo' }
+                ]
+            },
+            'escena2_rescate': {
+                text: "Vas a rescatar a tu esposa. En un tiroteo sangriento, matas a todos los bandidos. Tu esposa está a salvo, pero te das cuenta de que has vuelto a la vida criminal. Ahora, la ley te persigue y no puedes volver a tu vida de antes.",
+                choices: [
+                    { text: "Buscar un nuevo lugar para vivir, lejos de la ley.", nextSceneId: 'final_nuevo_lugar' },
+                    { text: "Entregarte a la ley para proteger a tu esposa.", nextSceneId: 'final_entregarse' },
+                    { text: "Formar una nueva banda para luchar contra la ley.", nextSceneId: 'final_nueva_banda' },
+                    { text: "Huir con tu esposa y vivir el resto de tus días como un fugitivo.", nextSceneId: 'final_fugitivos' }
+                ]
+            },
+            'final_nuevo_lugar': {
+                text: "Buscas un nuevo lugar para vivir, lejos de la ley. Te matan en un asalto. Fin de la historia.",
+                choices: []
+            },
+            'final_entregarse': {
+                text: "Te entregas a la ley para proteger a tu esposa. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_nueva_banda': {
+                text: "Formas una nueva banda para luchar contra la ley. Te matan en un tiroteo. Fin de la historia.",
+                choices: []
+            },
+            'final_fugitivos': {
+                text: "Huyes con tu esposa y vivís el resto de vuestros días como fugitivos. Te matan en un asalto. Fin de la historia.",
+                choices: []
+            },
+            'final_ley': {
+                text: "Buscas la ayuda de la ley para que rescaten a tu esposa. Ellos la rescatan, pero te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_negociar_bandidos': {
+                text: "Intentas negociar con los bandidos para que liberen a tu esposa. Ellos se ríen de ti y te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_huida_esposa': {
+                text: "Huyes de la ciudad y dejas a tu esposa atrás. Te matan en un asalto. Fin de la historia.",
+                choices: []
+            },
+            'final_traicion': {
+                text: "Robas a tu viejo amigo y huyes con el dinero que lleva. Te matan en un asalto. Fin de la historia.",
+                choices: []
+            },
+            'final_traicion_ley': {
+                text: "Buscas la ayuda de la ley para que lo capturen y así tú ser libre. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_huida': {
+                text: "Huyes del agente y dejas que tu amigo se encargue de él. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_traicion_agente': {
+                text: "Entregas a tu amigo al agente a cambio de tu libertad. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_muerte_agente': {
+                text: "Matas al agente y desapareces para siempre. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_nuevo_trabajo': {
+                text: "Aceptas el trato y te unes al agente. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_asesinato': {
+                text: "Te niegas a unirte al agente y lo matas. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_confrontar_amigo': {
+                text: "Confrontas a tu amigo y le pides que te ayude a escapar. Te matan. Fin de la historia.",
+                choices: []
+            }
+        };
+
+        let currentSceneId = 'start';
+
+        function loadScene(sceneId) {
+            const scene = story[sceneId];
+            if (!scene) {
+                console.error("Escena no encontrada:", sceneId);
+                return;
+            }
+
+            const storyText = document.getElementById('story-text');
+            const choicesContainer = document.getElementById('choices-container');
+            
+            // Animación para el texto
+            storyText.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+            setTimeout(() => {
+                storyText.textContent = scene.text;
+                storyText.classList.remove('opacity-0');
+            }, 250);
+
+            choicesContainer.innerHTML = '';
+            
+            if (scene.choices && scene.choices.length > 0) {
+                scene.choices.forEach(choice => {
+                    const button = document.createElement('button');
+                    button.textContent = choice.text;
+                    button.className = 'w-full px-6 py-4 bg-[#8c7853] text-[#2b231c] font-bold rounded-md shadow-md border-2 border-[#d4c1a5] hover:bg-[#d4c1a5] hover:text-[#2b231c] focus:outline-none focus:ring-4 focus:ring-[#d4c1a5] focus:ring-opacity-50';
+                    button.onclick = () => loadScene(choice.nextSceneId);
+                    choicesContainer.appendChild(button);
+                });
+            } else {
+                const endMessage = document.createElement('p');
+                endMessage.textContent = "Fin de la historia. ¡Gracias por jugar!";
+                endMessage.className = 'text-center text-2xl font-bold mt-8 text-[#d4c1a5]';
+                choicesContainer.appendChild(endMessage);
+
+                const restartButton = document.createElement('button');
+                restartButton.textContent = "Reiniciar juego";
+                restartButton.className = 'w-1/2 mx-auto mt-6 px-6 py-4 bg-[#8c7853] text-[#2b231c] font-bold rounded-md shadow-md border-2 border-[#d4c1a5] hover:bg-[#d4c1a5] hover:text-[#2b231c] focus:outline-none focus:ring-4 focus:ring-[#d4c1a5] focus:ring-opacity-50';
+                restartButton.onclick = () => loadScene('start');
+                choicesContainer.appendChild(restartButton);
+            }
+        }
+
+        window.onload = () => {
+            loadScene(currentSceneId);
+        };
+    </script>
+</body>
+</html>

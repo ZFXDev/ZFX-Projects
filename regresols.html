@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Regreso a Los Santos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1f2937 0%, #0d1216 100%);
+            color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .game-container {
+            max-width: 960px;
+            width: 100%;
+            background-color: #111827;
+            border: 2px solid #374151;
+        }
+        .story-text {
+            line-height: 1.8;
+            font-size: 1.125rem; /* text-lg */
+        }
+        .choices-container button {
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+            text-align: left;
+        }
+        .choices-container button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            background-color: #15803d; /* Cambiado a un verde oscuro para el tema de Grove Street */
+        }
+        /* Estilos para el efecto de sombra en el texto */
+        .story-text::after {
+            content: '';
+            display: block;
+            height: 50px;
+            background: linear-gradient(to top, #111827, transparent);
+            margin-top: -50px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="game-container rounded-3xl shadow-2xl p-8 md:p-12">
+        <h1 class="text-5xl font-bold text-center text-green-500 mb-6 tracking-wide">El Regreso a Los Santos</h1>
+        <hr class="border-gray-700 mb-8">
+        
+        <div id="story-text" class="story-text mb-8 overflow-y-auto max-h-[60vh] md:max-h-[70vh]">
+            <!-- El texto de la historia se cargará aquí -->
+        </div>
+
+        <div id="choices-container" class="choices-container grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+            <!-- Los 4 botones de elecciones se cargarán aquí -->
+        </div>
+
+    </div>
+
+    <script>
+        // Objeto que contiene todas las escenas del juego y sus opciones.
+        const story = {
+            'start': {
+                text: "Después de cinco años en Liberty City, regresas a Los Santos. El vuelo fue un infierno, pero la verdadera pesadilla comienza ahora. Tu madre ha sido asesinada y Grove Street Families, tu banda, está en ruinas. Al llegar, te encuentras con Big Smoke y Sweet, tu hermano. La tensión es palpable. '¿Dónde has estado, CJ?' te pregunta Sweet con desconfianza. 'Mamá ha muerto.'",
+                choices: [
+                    { text: "Explicar que no sabías nada y que estás aquí para ayudar.", nextSceneId: 'escena1_lealtad' },
+                    { text: "Ignorar la pregunta y preguntar quién mató a tu madre.", nextSceneId: 'escena1_venganza' },
+                    { text: "Admitir que huiste, pero que ahora has vuelto para quedarte.", nextSceneId: 'escena1_humildad' },
+                    { text: "Culpar a la banda por no proteger a tu madre, lo que aumenta la tensión.", nextSceneId: 'escena1_culpar' }
+                ]
+            },
+            'escena1_lealtad': {
+                text: "Sweet te mira a los ojos, notando tu sinceridad. 'Vale, hermano. Pero no todo es como lo dejaste. Los Ballas nos están aplastando. Ryder y Smoke te pondrán al día.' Te llevan al barrio, donde la situación es peor de lo que recordabas. Ves graffitis de los Ballas por todas partes. La banda está débil.",
+                choices: [
+                    { text: "Preguntar por una misión para recuperar el respeto de Grove Street.", nextSceneId: 'escena2_mision' },
+                    { text: "Sugerir un plan para debilitar a los Ballas en su propio territorio.", nextSceneId: 'escena2_estrategia' },
+                    { text: "Buscar a Ryder y Smoke para que te cuenten todo lo que ha pasado.", nextSceneId: 'escena2_hablar' },
+                    { text: "Proponer un asalto a los Vagos, la otra banda rival, para desviar la atención.", nextSceneId: 'escena2_desvio' }
+                ]
+            },
+            'escena1_venganza': {
+                text: "Sweet se enoja. '¡No te atrevas a culparnos! Tuviste tu oportunidad. Esto es mi guerra, no la tuya.' Big Smoke interviene y te da un mapa con la ubicación de un informante de los Ballas. 'Si quieres venganza, ve a buscarlo. El de la moto roja.'",
+                choices: [
+                    { text: "Ir a la ubicación del informante para interrogarlo.", nextSceneId: 'escena2_informante' },
+                    { text: "Rechazar la misión de Smoke y buscar a Ryder para una misión más segura.", nextSceneId: 'escena2_ryder' },
+                    { text: "Confrontar a Big Smoke, sospechando que tiene un motivo oculto.", nextSceneId: 'escena2_confrontar' },
+                    { text: "Usar tu dinero de Liberty City para comprar armas y munición.", nextSceneId: 'escena2_armas' }
+                ]
+            },
+            'escena1_humildad': {
+                text: "Sweet te da un abrazo. 'Bienvenido a casa, hermano. Sé que las cosas están difíciles, pero ahora eres todo lo que tenemos.' Te presenta a Ryder, quien te mira con desconfianza. 'El que huye siempre vuelve, ¿verdad, CJ?' Te da una misión para recuperar un cargamento robado de armas de los Vagos. 'No nos falles.'",
+                choices: [
+                    { text: "Ir a la ubicación del cargamento para recuperarlo.", nextSceneId: 'escena2_cargamento' },
+                    { text: "Pedirle a Ryder que te acompañe para que te guíe.", nextSceneId: 'escena2_ryder' },
+                    { text: "Desconfiar de la misión y hablar con Big Smoke para que te cuente más.", nextSceneId: 'escena2_hablar' },
+                    { text: "Decidir vender el cargamento por tu cuenta para ganar dinero rápido.", nextSceneId: 'escena2_vender' }
+                ]
+            },
+            'escena1_culpar': {
+                text: "Sweet se pone furioso. '¡Esto es por lo que te fuiste! ¡Toda esta mierda es por la tuya!' te grita. Sweet se aleja y te deja solo en Grove Street, donde un par de gánsteres de los Ballas te están esperando. Te atacan.",
+                choices: [
+                    { text: "Luchar contra los gánsteres de los Ballas.", nextSceneId: 'final_pelea' },
+                    { text: "Huir de Grove Street, dejando a Sweet solo.", nextSceneId: 'final_huir' },
+                    { text: "Pedir ayuda a Ryder y Big Smoke.", nextSceneId: 'final_ayuda' },
+                    { text: "Intentar razonar con los gánsteres de los Ballas.", nextSceneId: 'final_razonar' }
+                ]
+            },
+            'escena2_mision': {
+                text: "Sweet te encarga la primera misión: robar un coche para la banda. Te dice que vayas a la casa de un Vagos para conseguir el coche, pero que tengas cuidado, ya que los Vagos son muy peligrosos. Te da un mapa con la ubicación de la casa.",
+                choices: [
+                    { text: "Ir a la ubicación para robar el coche.", nextSceneId: 'escena3_robar' },
+                    { text: "Ir a la ubicación para negociar con los Vagos.", nextSceneId: 'escena3_negociar' },
+                    { text: "Ignorar la misión y buscar una misión más lucrativa.", nextSceneId: 'final_lucro' },
+                    { text: "Pedirle a Ryder y Big Smoke que te acompañen.", nextSceneId: 'escena3_acompañar' }
+                ]
+            },
+            'escena2_estrategia': {
+                text: "Sweet te mira, impresionado. 'Buena idea, CJ. Demuéstrales a los Ballas que Grove Street ha vuelto.' Te da un mapa con la ubicación de un camión de armas de los Ballas. 'Si lo robas, podremos armarnos y acabar con ellos.'",
+                choices: [
+                    { text: "Ir a la ubicación para robar el camión.", nextSceneId: 'escena3_robar_2' },
+                    { text: "Ir a la ubicación para negociar con los Ballas.", nextSceneId: 'escena3_negociar_2' },
+                    { text: "Ignorar la misión y buscar una misión más lucrativa.", nextSceneId: 'final_lucro' },
+                    { text: "Pedirle a Ryder y Big Smoke que te acompañen.", nextSceneId: 'escena3_acompañar' }
+                ]
+            },
+            'escena2_hablar': {
+                text: "Hablas con Ryder y Big Smoke. Te cuentan que la situación en Grove Street es insostenible. Los Ballas y los Vagos se han aliado para acabar con ellos. La única esperanza es que la banda se una. 'Necesitamos que hagas una misión para demostrar que estás con nosotros', te dice Ryder. Te da un mapa con la ubicación de un cargamento de armas de los Vagos.",
+                choices: [
+                    { text: "Ir a la ubicación para robar el cargamento.", nextSceneId: 'escena3_robar_3' },
+                    { text: "Ir a la ubicación para negociar con los Vagos.", nextSceneId: 'escena3_negociar_3' },
+                    { text: "Ignorar la misión y buscar una misión más lucrativa.", nextSceneId: 'final_lucro' },
+                    { text: "Pedirle a Ryder y Big Smoke que te acompañen.", nextSceneId: 'escena3_acompañar' }
+                ]
+            },
+            'escena2_desvio': {
+                text: "Sweet te mira, confundido. '¿Estás loco, CJ? Los Vagos son los menos de nuestros problemas. ¡Los Ballas son el verdadero enemigo!' Te ignora y se va. Te quedas solo en Grove Street, donde un par de gánsteres de los Vagos te están esperando. Te atacan.",
+                choices: [
+                    { text: "Luchar contra los gánsteres de los Vagos.", nextSceneId: 'final_pelea_2' },
+                    { text: "Huir de Grove Street, dejando a Sweet solo.", nextSceneId: 'final_huir_2' },
+                    { text: "Pedir ayuda a Ryder y Big Smoke.", nextSceneId: 'final_ayuda' },
+                    { text: "Intentar razonar con los gánsteres de los Vagos.", nextSceneId: 'final_razonar_2' }
+                ]
+            },
+            'escena2_informante': {
+                text: "Vas a la ubicación del informante de los Ballas. Es un hombre de aspecto sospechoso que está hablando por teléfono. Lo sigues hasta un almacén abandonado, donde lo ves hablando con Ryder y Big Smoke. Te das cuenta de que te han traicionado. Ryder te ve y te dispara. ¿Qué harás?",
+                choices: [
+                    { text: "Huir del almacén para buscar ayuda.", nextSceneId: 'final_huir_3' },
+                    { text: "Luchar contra Ryder y Big Smoke.", nextSceneId: 'final_pelea_3' },
+                    { text: "Llamar a Sweet para que te ayude.", nextSceneId: 'final_ayuda_2' },
+                    { text: "Intentar razonar con Ryder y Big Smoke.", nextSceneId: 'final_razonar_3' }
+                ]
+            },
+            'escena2_ryder': {
+                text: "Le pides a Ryder que te acompañe en la misión. Te mira con una sonrisa malvada. 'Claro, CJ. Te ayudaré a recuperar el cargamento.' Te lleva a un almacén abandonado, donde te espera Big Smoke. Ambos te apuntan con sus armas. Te das cuenta de que te han traicionado. 'Pensaste que éramos amigos, ¿verdad, CJ?' te dice Ryder. 'Estábamos aliados con los Ballas, tú eres la única amenaza.'",
+                choices: [
+                    { text: "Huir del almacén para buscar ayuda.", nextSceneId: 'final_huir_3' },
+                    { text: "Luchar contra Ryder y Big Smoke.", nextSceneId: 'final_pelea_3' },
+                    { text: "Llamar a Sweet para que te ayude.", nextSceneId: 'final_ayuda_2' },
+                    { text: "Intentar razonar con Ryder y Big Smoke.", nextSceneId: 'final_razonar_3' }
+                ]
+            },
+            'escena2_confrontar': {
+                text: "Confrontas a Big Smoke, sospechando de su motivo oculto. Te mira con una sonrisa malvada. 'Pensaste que éramos amigos, ¿verdad, CJ?' te dice. 'Estábamos aliados con los Ballas, tú eres la única amenaza.' Te apunta con un arma. ¿Qué harás?",
+                choices: [
+                    { text: "Huir de Big Smoke para buscar ayuda.", nextSceneId: 'final_huir_4' },
+                    { text: "Luchar contra Big Smoke.", nextSceneId: 'final_pelea_4' },
+                    { text: "Llamar a Sweet para que te ayude.", nextSceneId: 'final_ayuda_3' },
+                    { text: "Intentar razonar con Big Smoke.", nextSceneId: 'final_razonar_4' }
+                ]
+            },
+            'escena2_armas': {
+                text: "Usas tu dinero para comprar armas y munición. Te enfrentas a un grupo de gánsteres de los Ballas en la calle. Después de una feroz batalla, logras vencerlos. Te das cuenta de que la violencia no resuelve nada, pero te da una sensación de poder. Decides ir a buscar a Ryder y Big Smoke.",
+                choices: [
+                    { text: "Buscar a Ryder y Big Smoke para una misión.", nextSceneId: 'escena2_hablar' },
+                    { text: "Ir a la casa de Sweet para hablar con él.", nextSceneId: 'escena1_lealtad' },
+                    { text: "Ir al barrio de los Ballas para una venganza.", nextSceneId: 'final_venganza' },
+                    { text: "Decidir que no puedes confiar en nadie y seguir tu propio camino.", nextSceneId: 'final_camino' }
+                ]
+            },
+            'escena2_cargamento': {
+                text: "Vas a la ubicación del cargamento. Es un almacén abandonado, donde te esperan unos Vagos. Te enfrentas a ellos, pero son demasiados. Te das cuenta de que la misión es una trampa. Los Vagos te disparan. ¿Qué harás?",
+                choices: [
+                    { text: "Luchar contra los Vagos para defenderte.", nextSceneId: 'final_pelea_5' },
+                    { text: "Huir del almacén para buscar ayuda.", nextSceneId: 'final_huir_5' },
+                    { text: "Pedirle a los Vagos que te ayuden.", nextSceneId: 'final_ayuda_4' },
+                    { text: "Intentar razonar con los Vagos.", nextSceneId: 'final_razonar_5' }
+                ]
+            },
+            'escena2_vender': {
+                text: "Decides vender el cargamento de armas por tu cuenta. Contactas a un traficante de armas en el barrio. Te encuentras con él en un callejón, pero te traiciona y te roba el cargamento. 'Pensaste que eras más listo que yo, ¿verdad, CJ?' te dice. 'Ahora, el cargamento es mío.' Te apunta con un arma.",
+                choices: [
+                    { text: "Luchar contra el traficante de armas.", nextSceneId: 'final_pelea_6' },
+                    { text: "Huir del callejón para buscar ayuda.", nextSceneId: 'final_huir_6' },
+                    { text: "Llamar a la policía.", nextSceneId: 'final_policia' },
+                    { text: "Intentar razonar con el traficante de armas.", nextSceneId: 'final_razonar_6' }
+                ]
+            },
+            'escena3_robar': {
+                text: "Vas a la casa de los Vagos para robar el coche. Te enfrentas a ellos, pero son demasiados. Te disparan. Mueres en la calle, con el coche de tus sueños a tu lado. Fin de la historia.",
+                choices: []
+            },
+            'escena3_negociar': {
+                text: "Negocias con los Vagos para que te den el coche. Te dicen que te lo darán a cambio de un favor. ¿Qué favor?",
+                choices: [
+                    { text: "Aceptar el favor sin preguntar.", nextSceneId: 'final_favor' },
+                    { text: "Preguntar sobre el favor antes de aceptar.", nextSceneId: 'final_pregunta' },
+                    { text: "Rechazar el trato y robar el coche.", nextSceneId: 'escena3_robar' },
+                    { text: "Regresar a Grove Street y decirle a Sweet que no pudiste conseguir el coche.", nextSceneId: 'final_regresar' }
+                ]
+            },
+            'escena3_acompañar': {
+                text: "Le pides a Ryder y Big Smoke que te acompañen. Juntos, van a la misión. Te das cuenta de que te han traicionado. Te apuntan con sus armas. 'Pensaste que éramos amigos, ¿verdad, CJ?' te dice Ryder. 'Estábamos aliados con los Ballas, tú eres la única amenaza.'",
+                choices: [
+                    { text: "Huir para buscar ayuda.", nextSceneId: 'final_huir_3' },
+                    { text: "Luchar contra Ryder y Big Smoke.", nextSceneId: 'final_pelea_3' },
+                    { text: "Llamar a Sweet para que te ayude.", nextSceneId: 'final_ayuda_2' },
+                    { text: "Intentar razonar con Ryder y Big Smoke.", nextSceneId: 'final_razonar_3' }
+                ]
+            },
+            'escena3_robar_2': {
+                text: "Robas el camión de armas de los Ballas. Regresas a Grove Street, donde Sweet te felicita. 'Buen trabajo, CJ. Ahora podemos armarnos y acabar con ellos.' Te das cuenta de que has recuperado el respeto de la banda. Fin de la historia.",
+                choices: []
+            },
+            'escena3_negociar_2': {
+                text: "Negocias con los Ballas para que te den el camión. Te dicen que te lo darán a cambio de un favor. ¿Qué favor?",
+                choices: [
+                    { text: "Aceptar el favor sin preguntar.", nextSceneId: 'final_favor_2' },
+                    { text: "Preguntar sobre el favor antes de aceptar.", nextSceneId: 'final_pregunta_2' },
+                    { text: "Rechazar el trato y robar el camión.", nextSceneId: 'escena3_robar_2' },
+                    { text: "Regresar a Grove Street y decirle a Sweet que no pudiste conseguir el camión.", nextSceneId: 'final_regresar_2' }
+                ]
+            },
+            'escena3_robar_3': {
+                text: "Robas el cargamento de armas de los Vagos. Regresas a Grove Street, donde Ryder y Big Smoke te felicitan. 'Buen trabajo, CJ. Ahora podemos armarnos y acabar con ellos.' Te das cuenta de que has recuperado el respeto de la banda. Fin de la historia.",
+                choices: []
+            },
+            'escena3_negociar_3': {
+                text: "Negocias con los Vagos para que te den el cargamento. Te dicen que te lo darán a cambio de un favor. ¿Qué favor?",
+                choices: [
+                    { text: "Aceptar el favor sin preguntar.", nextSceneId: 'final_favor_3' },
+                    { text: "Preguntar sobre el favor antes de aceptar.", nextSceneId: 'final_pregunta_3' },
+                    { text: "Rechazar el trato y robar el cargamento.", nextSceneId: 'escena3_robar_3' },
+                    { text: "Regresar a Grove Street y decirle a Ryder y Big Smoke que no pudiste conseguir el cargamento.", nextSceneId: 'final_regresar_3' }
+                ]
+            },
+            'final_pelea': {
+                text: "Luchas contra los gánsteres de los Ballas. Después de una feroz batalla, logras vencerlos. Te das cuenta de que la violencia no resuelve nada, pero te da una sensación de poder. Decides seguir tu propio camino, dejando a Grove Street en ruinas. Fin de la historia.",
+                choices: []
+            },
+            'final_huir': {
+                text: "Huyes de Grove Street. Los gánsteres de los Ballas te persiguen. Te escondes en un callejón, pero te encuentran y te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_ayuda': {
+                text: "Pides ayuda a Ryder y Big Smoke. Te miran con una sonrisa malvada. 'Pensaste que éramos amigos, ¿verdad, CJ?' te dice Ryder. 'Estábamos aliados con los Ballas, tú eres la única amenaza.' Te disparan. Fin de la historia.",
+                choices: []
+            },
+            'final_razonar': {
+                text: "Intentas razonar con los gánsteres de los Ballas. Te ríes de ellos y te dicen que eres un cobarde. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_lucro': {
+                text: "Ignoras la misión y buscas una misión más lucrativa. Te das cuenta de que el dinero no te da felicidad. Te matan en un asalto. Fin de la historia.",
+                choices: []
+            },
+            'final_pelea_2': {
+                text: "Luchas contra los gánsteres de los Vagos. Después de una feroz batalla, logras vencerlos. Te das cuenta de que la violencia no resuelve nada, pero te da una sensación de poder. Decides seguir tu propio camino, dejando a Grove Street en ruinas. Fin de la historia.",
+                choices: []
+            },
+            'final_huir_2': {
+                text: "Huyes de Grove Street. Los gánsteres de los Vagos te persiguen. Te escondes en un callejón, pero te encuentran y te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_razonar_2': {
+                text: "Intentas razonar con los gánsteres de los Vagos. Te ríes de ellos y te dicen que eres un cobarde. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_huir_3': {
+                text: "Huyes del almacén para buscar ayuda. Ryder y Big Smoke te persiguen, pero logras escapar. Te das cuenta de que Sweet es el único en quien puedes confiar. Te unes a él y, juntos, se enfrentan a los traidores. Fin de la historia.",
+                choices: []
+            },
+            'final_pelea_3': {
+                text: "Luchas contra Ryder y Big Smoke. Después de una feroz batalla, logras vencerlos. Te das cuenta de que la traición es el peor de los crímenes. Te unes a Sweet y, juntos, reconstruyen Grove Street. Fin de la historia.",
+                choices: []
+            },
+            'final_ayuda_2': {
+                text: "Llamas a Sweet para que te ayude. Llega al almacén y se enfrenta a Ryder y Big Smoke. '¡Siempre supe que no se podía confiar en ustedes!' les grita. Después de una feroz batalla, logran vencerlos. Sweet te abraza. 'Bienvenido a casa, CJ. Ahora somos una familia.' Fin de la historia.",
+                choices: []
+            },
+            'final_razonar_3': {
+                text: "Intentas razonar con Ryder y Big Smoke. Se ríen de ti y te dicen que eres un cobarde. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_huir_4': {
+                text: "Huyes de Big Smoke para buscar ayuda. Te persigue, pero logras escapar. Te das cuenta de que Sweet es el único en quien puedes confiar. Te unes a él y, juntos, se enfrentan a los traidores. Fin de la historia.",
+                choices: []
+            },
+            'final_pelea_4': {
+                text: "Luchas contra Big Smoke. Después de una feroz batalla, logras vencerlo. Te das cuenta de que la traición es el peor de los crímenes. Te unes a Sweet y, juntos, reconstruyen Grove Street. Fin de la historia.",
+                choices: []
+            },
+            'final_ayuda_3': {
+                text: "Llamas a Sweet para que te ayude. Llega y se enfrenta a Big Smoke. '¡Siempre supe que no se podía confiar en ti!' le grita. Después de una feroz batalla, logran vencerlo. Sweet te abraza. 'Bienvenido a casa, CJ. Ahora somos una familia.' Fin de la historia.",
+                choices: []
+            },
+            'final_razonar_4': {
+                text: "Intentas razonar con Big Smoke. Se ríe de ti y te dice que eres un cobarde. Te mata. Fin de la historia.",
+                choices: []
+            },
+            'final_venganza': {
+                text: "Vas al barrio de los Ballas para una venganza. Te enfrentas a ellos, pero son demasiados. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_camino': {
+                text: "Decides que no puedes confiar en nadie y sigues tu propio camino. Te conviertes en un gánster que busca su propio poder. Te olvidas de la banda y de tu familia. Te matan en un asalto. Fin de la historia.",
+                choices: []
+            },
+            'final_pelea_5': {
+                text: "Luchas contra los Vagos para defenderte. Después de una feroz batalla, logras vencerlos. Te das cuenta de que la violencia no resuelve nada, pero te da una sensación de poder. Regresas a Grove Street, donde Sweet te felicita. 'Buen trabajo, CJ. Ahora podemos armarnos y acabar con ellos.' Fin de la historia.",
+                choices: []
+            },
+            'final_huir_5': {
+                text: "Huyes del almacén para buscar ayuda. Los Vagos te persiguen. Te escondes en un callejón, pero te encuentran y te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_ayuda_4': {
+                text: "Pides ayuda a los Vagos. Te miran con una sonrisa malvada. 'Pensaste que éramos amigos, ¿verdad, CJ?' te dice uno de ellos. 'Estábamos aliados con los Ballas, tú eres la única amenaza.' Te disparan. Fin de la historia.",
+                choices: []
+            },
+            'final_razonar_5': {
+                text: "Intentas razonar con los Vagos. Te ríes de ellos y te dicen que eres un cobarde. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_pelea_6': {
+                text: "Luchas contra el traficante de armas. Después de una feroz batalla, logras vencerlo. Te das cuenta de que la violencia no resuelve nada, pero te da una sensación de poder. Te unes a la banda y, juntos, reconstruyen Grove Street. Fin de la historia.",
+                choices: []
+            },
+            'final_huir_6': {
+                text: "Huyes del callejón para buscar ayuda. El traficante de armas te persigue. Te escondes en un callejón, pero te encuentra y te mata. Fin de la historia.",
+                choices: []
+            },
+            'final_policia': {
+                text: "Llamas a la policía. Llegan al callejón y arrestan al traficante de armas. Te felicitan y te dan un arma. Te das cuenta de que la policía no es tu enemiga. Te unes a ellos y, juntos, se enfrentan a los traidores. Fin de la historia.",
+                choices: []
+            },
+            'final_razonar_6': {
+                text: "Intentas razonar con el traficante de armas. Se ríe de ti y te dice que eres un cobarde. Te mata. Fin de la historia.",
+                choices: []
+            },
+            'final_favor': {
+                text: "Aceptas el favor sin preguntar. Te dicen que el favor es robar un coche para ellos. Te das cuenta de que te han traicionado. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_pregunta': {
+                text: "Preguntas sobre el favor antes de aceptar. Te dicen que el favor es robar un coche para ellos. Te das cuenta de que te han traicionado. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_regresar': {
+                text: "Regresas a Grove Street y le dices a Sweet que no pudiste conseguir el coche. Sweet se enoja. 'No puedes confiar en nadie, CJ. Te dije que tenías que hacerlo.' Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_favor_2': {
+                text: "Aceptas el favor sin preguntar. Te dicen que el favor es robar un camión para ellos. Te das cuenta de que te han traicionado. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_pregunta_2': {
+                text: "Preguntas sobre el favor antes de aceptar. Te dicen que el favor es robar un camión para ellos. Te das cuenta de que te han traicionado. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_regresar_2': {
+                text: "Regresas a Grove Street y le dices a Sweet que no pudiste conseguir el camión. Sweet se enoja. 'No puedes confiar en nadie, CJ. Te dije que tenías que hacerlo.' Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_favor_3': {
+                text: "Aceptas el favor sin preguntar. Te dicen que el favor es robar un cargamento de armas para ellos. Te das cuenta de que te han traicionado. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_pregunta_3': {
+                text: "Preguntas sobre el favor antes de aceptar. Te dicen que el favor es robar un cargamento de armas para ellos. Te das cuenta de que te han traicionado. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_regresar_3': {
+                text: "Regresas a Grove Street y le dices a Ryder y Big Smoke que no pudiste conseguir el cargamento. Se enojan. 'No puedes confiar en nadie, CJ. Te dijimos que tenías que hacerlo.' Te matan. Fin de la historia.",
+                choices: []
+            },
+        };
+
+        let currentSceneId = 'start';
+
+        function loadScene(sceneId) {
+            const scene = story[sceneId];
+            if (!scene) {
+                console.error("Escena no encontrada:", sceneId);
+                return;
+            }
+
+            const storyText = document.getElementById('story-text');
+            const choicesContainer = document.getElementById('choices-container');
+            
+            // Animación para el texto
+            storyText.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+            setTimeout(() => {
+                storyText.textContent = scene.text;
+                storyText.classList.remove('opacity-0');
+            }, 250);
+
+            choicesContainer.innerHTML = '';
+            
+            if (scene.choices && scene.choices.length > 0) {
+                scene.choices.forEach(choice => {
+                    const button = document.createElement('button');
+                    button.textContent = choice.text;
+                    button.className = 'w-full px-6 py-4 bg-gray-800 text-green-500 font-bold rounded-xl shadow-lg border-2 border-green-500 hover:bg-green-500 hover:text-white focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50';
+                    button.onclick = () => loadScene(choice.nextSceneId);
+                    choicesContainer.appendChild(button);
+                });
+            } else {
+                const endMessage = document.createElement('p');
+                endMessage.textContent = "Fin de la historia. ¡Gracias por jugar!";
+                endMessage.className = 'text-center text-2xl font-bold mt-8 text-green-500';
+                choicesContainer.appendChild(endMessage);
+
+                const restartButton = document.createElement('button');
+                restartButton.textContent = "Reiniciar juego";
+                restartButton.className = 'w-1/2 mx-auto mt-6 px-6 py-4 bg-gray-800 text-green-500 font-bold rounded-xl shadow-lg border-2 border-green-500 hover:bg-green-500 hover:text-white focus:outline-none focus:ring-4 focus:ring-green-500 focus:ring-opacity-50';
+                restartButton.onclick = () => loadScene('start');
+                choicesContainer.appendChild(restartButton);
+            }
+        }
+
+        window.onload = () => {
+            loadScene(currentSceneId);
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Amanecer en Vice City</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background: linear-gradient(135deg, #1d0f3a 0%, #0d061f 100%);
+            color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .game-container {
+            max-width: 960px;
+            width: 100%;
+            background-color: #0d061f;
+            border: 2px solid #5a0a81;
+        }
+        .story-text {
+            line-height: 1.8;
+            font-size: 1.125rem; /* text-lg */
+        }
+        .choices-container button {
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+            text-align: left;
+        }
+        .choices-container button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+            background-color: #8b5cf6; /* Morado claro para el hover */
+        }
+        /* Estilos para el efecto de sombra en el texto */
+        .story-text::after {
+            content: '';
+            display: block;
+            height: 50px;
+            background: linear-gradient(to top, #0d061f, transparent);
+            margin-top: -50px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="game-container rounded-3xl shadow-2xl p-8 md:p-12">
+        <h1 class="text-5xl font-bold text-center text-purple-400 mb-6 tracking-wide" style="text-shadow: 0 0 10px #d8b4fe, 0 0 20px #c084fc;">El Amanecer en Vice City</h1>
+        <hr class="border-purple-600 mb-8">
+        
+        <div id="story-text" class="story-text mb-8 overflow-y-auto max-h-[60vh] md:max-h-[70vh]">
+            <!-- El texto de la historia se cargará aquí -->
+        </div>
+
+        <div id="choices-container" class="choices-container grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+            <!-- Los 4 botones de elecciones se cargarán aquí -->
+        </div>
+
+    </div>
+
+    <script>
+        // Objeto que contiene todas las escenas del juego y sus opciones.
+        const story = {
+            'start': {
+                text: "Acabas de llegar a Vice City, un paraíso de neones y vicios. Has sido enviado por Sonny Forelli para un negocio de drogas, pero el trato se tuerce en los muelles. Una emboscada, disparos y explosiones. Escapas por los pelos con tu abogado, Ken Rosenberg, pero has perdido el dinero y la cocaína. Sonny está furioso y te exige una explicación.",
+                choices: [
+                    { text: "Llamar a Sonny y asumir la culpa.", nextSceneId: 'escena1_sonny_enfadado' },
+                    { text: "Llamar a Sonny y culpar a los demás por la emboscada.", nextSceneId: 'escena1_sonny_negacion' },
+                    { text: "Decidir no llamar a Sonny y resolver el problema por tu cuenta.", nextSceneId: 'escena1_solo' },
+                    { text: "Presionar a Rosenberg para que averigüe quiénes eran los traficantes.", nextSceneId: 'escena1_rosenberg_presion' }
+                ]
+            },
+            'escena1_sonny_enfadado': {
+                text: "Le confiesas a Sonny lo que pasó. Él te grita y te advierte que si no recuperas la droga y el dinero, tu vida en Vice City será muy corta. Te ordena que busques a Ricardo Diaz, un poderoso capo local, para que te ayude a encontrar a los responsables.",
+                choices: [
+                    { text: "Visitar a Ricardo Diaz y pedirle ayuda.", nextSceneId: 'escena2_diaz_ayuda' },
+                    { text: "Ignorar la orden y buscar a los traficantes por tu cuenta.", nextSceneId: 'escena2_autodidacta' },
+                    { text: "Presionar a Rosenberg para que te consiga más dinero.", nextSceneId: 'escena2_rosenberg_dinero' },
+                    { text: "Llamar a Sonny y pedirle más hombres.", nextSceneId: 'final_sonny_hombres' }
+                ]
+            },
+            'escena1_sonny_negacion': {
+                text: "Le mientes a Sonny y le dices que la emboscada fue una trampa de los traficantes locales. Él te responde con incredulidad y te amenaza. 'No me tomes el pelo, Tommy. Recupera mi dinero o tu cabeza será la siguiente.' Te da el número de Ricardo Diaz, un pez gordo local, para que te ayude.",
+                choices: [
+                    { text: "Visitar a Ricardo Diaz y contarle la verdad.", nextSceneId: 'escena2_diaz_verdad' },
+                    { text: "Mentirle a Diaz y culpar a los traficantes de la emboscada.", nextSceneId: 'escena2_diaz_mentira' },
+                    { text: "Ignorar la orden y seguir tu propio camino.", nextSceneId: 'escena2_autodidacta' },
+                    { text: "Llamar a Sonny y pedirle que confíe en ti.", nextSceneId: 'final_sonny_confianza' }
+                ]
+            },
+            'escena1_solo': {
+                text: "No llamas a Sonny. Te escondes en un hotel barato con Rosenberg, y él te dice que ha oído hablar de un traficante local llamado Lance Vance que podría tener la clave para el trato. Tendrás que buscarlo en la ciudad para que te cuente lo que sabe. ",
+                choices: [
+                    { text: "Buscar a Lance Vance en el hotel.", nextSceneId: 'escena2_lance' },
+                    { text: "Ir a la casa de Diaz para conseguir más dinero.", nextSceneId: 'escena2_diaz_dinero' },
+                    { text: "Robar a los traficantes locales para recuperar el dinero.", nextSceneId: 'final_robos' },
+                    { text: "Llamar a Sonny y contarle lo que ha pasado.", nextSceneId: 'escena1_sonny_enfadado' }
+                ]
+            },
+            'escena1_rosenberg_presion': {
+                text: "Presionas a Rosenberg para que averigüe quiénes eran los traficantes. Él te dice que no tiene contactos y que es un abogado. 'Mejor busca a Diaz, él es la única persona que sabe quiénes son los traficantes y dónde están.' Te da el número de teléfono de Diaz, pero te advierte que no confíes en nadie en Vice City.",
+                choices: [
+                    { text: "Llamar a Diaz y pedirle ayuda.", nextSceneId: 'escena2_diaz_ayuda' },
+                    { text: "Ignorar la advertencia y seguir tu propio camino.", nextSceneId: 'escena2_autodidacta' },
+                    { text: "Llamar a Sonny y contarle lo que ha pasado.", nextSceneId: 'escena1_sonny_enfadado' },
+                    { text: "Robar a los traficantes locales para recuperar el dinero.", nextSceneId: 'final_robos' }
+                ]
+            },
+            'escena2_diaz_ayuda': {
+                text: "Visitas a Ricardo Diaz. Es un hombre de negocios excéntrico, pero poderoso. Él te dice que conoce a los traficantes que te emboscaron y que te ayudará a recuperarlo todo, pero a cambio de un favor. Tendrás que robar un cargamento de armas de los Vagos, la banda local. ¿Aceptas el trato?",
+                choices: [
+                    { text: "Aceptar el trato de Diaz.", nextSceneId: 'escena3_diaz_favor' },
+                    { text: "Rechazar el trato de Diaz.", nextSceneId: 'final_diaz_rechazo' },
+                    { text: "Llamar a Sonny y contarle lo que ha pasado.", nextSceneId: 'final_sonny_confianza' },
+                    { text: "Intentar engañar a Diaz y robarle las armas.", nextSceneId: 'final_diaz_engaño' }
+                ]
+            },
+            'escena2_autodidacta': {
+                text: "Decides resolver el problema por tu cuenta. Te pasas días buscando a los traficantes, pero no encuentras nada. Te das cuenta de que la ciudad es un laberinto sin fin. Un día, te encuentras con Lance Vance, un traficante que te dice que ha oído hablar de ti y que conoce a los traficantes que te emboscaron. Te da una ubicación de su escondite.",
+                choices: [
+                    { text: "Ir a la ubicación de los traficantes.", nextSceneId: 'escena3_lance_confianza' },
+                    { text: "Ignorar a Lance y seguir tu propio camino.", nextSceneId: 'final_camino_solo' },
+                    { text: "Robar a Lance para conseguir dinero.", nextSceneId: 'final_lance_robo' },
+                    { text: "Llamar a Sonny y contarle lo que ha pasado.", nextSceneId: 'escena1_sonny_enfadado' }
+                ]
+            },
+            'escena2_rosenberg_dinero': {
+                text: "Presionas a Rosenberg para que te consiga más dinero. Él te dice que no tiene nada y que está en bancarrota. 'Tendrás que buscar a Diaz, él es el único que puede conseguirte más dinero.' Te da el número de teléfono de Diaz, pero te advierte que no confíes en nadie en Vice City.",
+                choices: [
+                    { text: "Llamar a Diaz y pedirle ayuda.", nextSceneId: 'escena2_diaz_ayuda' },
+                    { text: "Ignorar la advertencia y seguir tu propio camino.", nextSceneId: 'escena2_autodidacta' },
+                    { text: "Llamar a Sonny y contarle lo que ha pasado.", nextSceneId: 'escena1_sonny_enfadado' },
+                    { text: "Robar a los traficantes locales para recuperar el dinero.", nextSceneId: 'final_robos' }
+                ]
+            },
+            'escena2_diaz_verdad': {
+                text: "Visitas a Ricardo Diaz y le cuentas la verdad. Él te dice que admira tu sinceridad y que te ayudará a recuperar el dinero y la droga, pero a cambio de un favor. Tendrás que robar un cargamento de armas de los Vagos, la banda local. ¿Aceptas el trato?",
+                choices: [
+                    { text: "Aceptar el trato de Diaz.", nextSceneId: 'escena3_diaz_favor' },
+                    { text: "Rechazar el trato de Diaz.", nextSceneId: 'final_diaz_rechazo' },
+                    { text: "Llamar a Sonny y contarle lo que ha pasado.", nextSceneId: 'final_sonny_confianza' },
+                    { text: "Intentar engañar a Diaz y robarle las armas.", nextSceneId: 'final_diaz_engaño' }
+                ]
+            },
+            'escena2_diaz_mentira': {
+                text: "Le mientes a Diaz y le dices que los traficantes te emboscaron. Él te mira con una sonrisa malvada. 'No me mientas, Tommy. Sé lo que pasó.' Te amenaza y te dice que si no recuperas el dinero, tu vida en Vice City será muy corta. Te da una misión para robar un cargamento de armas de los Vagos.",
+                choices: [
+                    { text: "Aceptar el trato de Diaz.", nextSceneId: 'escena3_diaz_favor' },
+                    { text: "Rechazar el trato de Diaz.", nextSceneId: 'final_diaz_rechazo' },
+                    { text: "Llamar a Sonny y contarle lo que ha pasado.", nextSceneId: 'final_sonny_confianza' },
+                    { text: "Intentar engañar a Diaz y robarle las armas.", nextSceneId: 'final_diaz_engaño' }
+                ]
+            },
+            'escena2_lance': {
+                text: "Buscas a Lance Vance en la ciudad. Él te dice que ha oído hablar de ti y que conoce a los traficantes que te emboscaron. Te da una ubicación de su escondite y te dice que te ayudará a recuperarlo todo, pero a cambio de un favor. Tendrás que robar un cargamento de armas de los Vagos, la banda local. ¿Aceptas el trato?",
+                choices: [
+                    { text: "Aceptar el trato de Lance.", nextSceneId: 'escena3_lance_confianza' },
+                    { text: "Rechazar el trato de Lance.", nextSceneId: 'final_lance_rechazo' },
+                    { text: "Robar a Lance para conseguir dinero.", nextSceneId: 'final_lance_robo' },
+                    { text: "Llamar a Sonny y contarle lo que ha pasado.", nextSceneId: 'escena1_sonny_enfadado' }
+                ]
+            },
+            'escena2_diaz_dinero': {
+                text: "Vas a la casa de Diaz para conseguir más dinero. Él te mira con una sonrisa malvada. '¿Crees que soy un banco, Tommy? Aquí nadie regala nada.' Te dispara. Mueres en la casa de Diaz. Fin de la historia.",
+                choices: []
+            },
+            'escena3_diaz_favor': {
+                text: "Aceptas el trato de Diaz. Robas el cargamento de armas de los Vagos y se lo entregas a Diaz. Él te dice que has ganado su respeto y que te ayudará a encontrar a los traficantes. Te da una ubicación de un almacén abandonado donde están los traficantes. Te dice que te vengues. Te unes a Diaz y, juntos, se enfrentan a los traficantes. Fin de la historia.",
+                choices: []
+            },
+            'escena3_lance_confianza': {
+                text: "Aceptas el trato de Lance. Robas el cargamento de armas de los Vagos y se lo entregas a Lance. Él te dice que has ganado su respeto y que te ayudará a encontrar a los traficantes. Te da una ubicación de un almacén abandonado donde están los traficantes. Te dice que te vengues. Te unes a Lance y, juntos, se enfrentan a los traficantes. Fin de la historia.",
+                choices: []
+            },
+            'final_sonny_hombres': {
+                text: "Le pides a Sonny más hombres. Él se niega, ya que no confía en ti. Te mata. Fin de la historia.",
+                choices: []
+            },
+            'final_sonny_confianza': {
+                text: "Llamas a Sonny y le pides que confíe en ti. Él se niega, ya que no confía en ti. Te mata. Fin de la historia.",
+                choices: []
+            },
+            'final_robos': {
+                text: "Robas a los traficantes locales para recuperar el dinero. Te das cuenta de que la violencia no resuelve nada, pero te da una sensación de poder. Te matan en un asalto. Fin de la historia.",
+                choices: []
+            },
+            'final_diaz_rechazo': {
+                text: "Rechazas el trato de Diaz. Él se enoja y te dispara. Mueres en la casa de Diaz. Fin de la historia.",
+                choices: []
+            },
+            'final_diaz_engaño': {
+                text: "Intentas engañar a Diaz y robarle las armas. Él se da cuenta de tu plan y te mata. Fin de la historia.",
+                choices: []
+            },
+            'final_camino_solo': {
+                text: "Ignoras a Lance y sigues tu propio camino. Te conviertes en un gánster que busca su propio poder. Te olvidas de Sonny y de los demás. Te matan en un asalto. Fin de la historia.",
+                choices: []
+            },
+            'final_lance_robo': {
+                text: "Robas a Lance para conseguir dinero. Él se da cuenta de tu plan y te dispara. Mueres en la calle. Fin de la historia.",
+                choices: []
+            },
+            'final_lance_rechazo': {
+                text: "Rechazas el trato de Lance. Él se enoja y te dispara. Mueres en la calle. Fin de la historia.",
+                choices: []
+            },
+        };
+
+        let currentSceneId = 'start';
+
+        function loadScene(sceneId) {
+            const scene = story[sceneId];
+            if (!scene) {
+                console.error("Escena no encontrada:", sceneId);
+                return;
+            }
+
+            const storyText = document.getElementById('story-text');
+            const choicesContainer = document.getElementById('choices-container');
+            
+            // Animación para el texto
+            storyText.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+            setTimeout(() => {
+                storyText.textContent = scene.text;
+                storyText.classList.remove('opacity-0');
+            }, 250);
+
+            choicesContainer.innerHTML = '';
+            
+            if (scene.choices && scene.choices.length > 0) {
+                scene.choices.forEach(choice => {
+                    const button = document.createElement('button');
+                    button.textContent = choice.text;
+                    button.className = 'w-full px-6 py-4 bg-gray-800 text-purple-400 font-bold rounded-xl shadow-lg border-2 border-purple-500 hover:bg-purple-500 hover:text-white focus:outline-none focus:ring-4 focus:ring-purple-500 focus:ring-opacity-50';
+                    button.onclick = () => loadScene(choice.nextSceneId);
+                    choicesContainer.appendChild(button);
+                });
+            } else {
+                const endMessage = document.createElement('p');
+                endMessage.textContent = "Fin de la historia. ¡Gracias por jugar!";
+                endMessage.className = 'text-center text-2xl font-bold mt-8 text-purple-400';
+                choicesContainer.appendChild(endMessage);
+
+                const restartButton = document.createElement('button');
+                restartButton.textContent = "Reiniciar juego";
+                restartButton.className = 'w-1/2 mx-auto mt-6 px-6 py-4 bg-gray-800 text-purple-400 font-bold rounded-xl shadow-lg border-2 border-purple-500 hover:bg-purple-500 hover:text-white focus:outline-none focus:ring-4 focus:ring-purple-500 focus:ring-opacity-50';
+                restartButton.onclick = () => loadScene('start');
+                choicesContainer.appendChild(restartButton);
+            }
+        }
+
+        window.onload = () => {
+            loadScene(currentSceneId);
+        };
+    </script>
+</body>
+</html>

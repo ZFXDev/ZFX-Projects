@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Promesa Rota de Liberty City</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #0f0f0f;
+            color: #d1d5db; /* Texto gris claro */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .game-container {
+            max-width: 960px;
+            width: 100%;
+            background-color: #1a1a1a;
+            border: 2px solid #374151;
+        }
+        .story-text {
+            line-height: 1.8;
+            font-size: 1.125rem; /* text-lg */
+            border-left: 4px solid #ef4444; /* Línea roja para un toque de color */
+            padding-left: 1.5rem;
+        }
+        .choices-container button {
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+            text-align: left;
+        }
+        .choices-container button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+            background-color: #ef4444; /* Rojo para el hover */
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="game-container rounded-lg shadow-2xl p-8 md:p-12">
+        <h1 class="text-5xl font-bold text-center text-gray-100 mb-6 tracking-wide">La Promesa Rota de Liberty City</h1>
+        <hr class="border-gray-700 mb-8">
+        
+        <div id="story-text" class="story-text mb-8 overflow-y-auto max-h-[60vh] md:max-h-[70vh]">
+            <!-- El texto de la historia se cargará aquí -->
+        </div>
+
+        <div id="choices-container" class="choices-container grid grid-cols-1 gap-4 mt-8">
+            <!-- Los 4 botones de elecciones se cargarán aquí -->
+        </div>
+
+    </div>
+
+    <script>
+        // Objeto que contiene todas las escenas del juego y sus opciones.
+        const story = {
+            'start': {
+                text: "El barco de carga llega al puerto de Liberty City. Después de meses de viaje, te reúnes con tu primo Roman, que te había prometido una vida de lujo y oportunidades. La realidad, sin embargo, es un pequeño apartamento en Broker y un negocio de taxis en quiebra. Roman te saluda con una sonrisa nerviosa. 'Bienvenido a la tierra de las oportunidades, primo. No te preocupes, el dinero está a la vuelta de la esquina.'",
+                choices: [
+                    { text: "Confrontar a Roman por sus mentiras de inmediato.", nextSceneId: 'escena1_confrontar_roman' },
+                    { text: "Aceptar la situación y preguntar cómo puedes ayudar con el negocio de taxis.", nextSceneId: 'escena1_ayudar_roman' },
+                    { text: "Ignorar a Roman y salir a explorar la ciudad por tu cuenta.", nextSceneId: 'escena1_explorar_solo' },
+                    { text: "Preguntarle a Roman sobre sus 'oportunidades' de dinero rápido.", nextSceneId: 'escena1_dinero_rapido' }
+                ]
+            },
+            'escena1_confrontar_roman': {
+                text: "Roman se pone a la defensiva. '¿Qué esperabas? ¡Esto es Liberty City! Aquí tienes que luchar por lo que quieres.' Te confiesa que tiene serias deudas de juego con un peligroso prestamista ruso, y que sin tu ayuda, ambos están en peligro. 'Necesito que me ayudes a solucionar este problema, primo. Somos familia.'",
+                choices: [
+                    { text: "Aceptar a regañadientes y ir a buscar al prestamista.", nextSceneId: 'escena2_prestamista' },
+                    { text: "Negarte y exigirle que resuelva sus propios problemas.", nextSceneId: 'final_roman_solo' },
+                    { text: "Buscar tus viejos contactos militares para conseguir un arma.", nextSceneId: 'escena2_arma_militar' },
+                    { text: "Pedirle a Roman que huya de la ciudad contigo.", nextSceneId: 'final_huida' }
+                ]
+            },
+            'escena1_ayudar_roman': {
+                text: "Roman parece aliviado por tu calma. Te explica que su principal problema son unas deudas de juego con un prestamista llamado Dimitri Rascalov, un tipo del que no se fía. 'Si me ayudas a conseguir un poco de dinero conduciendo taxis, quizá pueda pagarle. Es nuestra única esperanza.'",
+                choices: [
+                    { text: "Aceptar y empezar a trabajar como taxista para ganar dinero.", nextSceneId: 'escena2_taxista' },
+                    { text: "Sugerir un plan para robar dinero a un rival de Roman.", nextSceneId: 'escena2_robo' },
+                    { text: "Preguntar por más detalles sobre Dimitri Rascalov.", nextSceneId: 'escena2_investigar_dimitri' },
+                    { text: "Decidir no trabajar y buscar una forma más rápida de conseguir dinero.", nextSceneId: 'escena1_dinero_rapido' }
+                ]
+            },
+            'escena1_explorar_solo': {
+                text: "Sales del apartamento y te adentras en la fría y caótica ciudad. En un callejón oscuro, te encuentras con un gánster que te ofrece un 'trabajo fácil'. Te pide que recojas un paquete para él, pero no te da muchos detalles. Es tu oportunidad de empezar de cero sin la sombra de Roman.",
+                choices: [
+                    { text: "Aceptar el trabajo para el gánster, sin hacer preguntas.", nextSceneId: 'escena2_paquete' },
+                    { text: "Rechazar el trabajo y regresar a la casa de Roman.", nextSceneId: 'escena1_ayudar_roman' },
+                    { text: "Robar al gánster y huir con el paquete.", nextSceneId: 'final_doble_cruz' },
+                    { text: "Preguntarle al gánster si tiene algún contacto militar.", nextSceneId: 'final_contacto_militar' }
+                ]
+            },
+            'escena1_dinero_rapido': {
+                text: "Roman se pone serio. 'Conozco a un tipo que podría ayudarnos. Es un viejo amigo de los Balcanes. Podría darnos una misión.' Roman te presenta a un hombre llamado Little Jacob, un traficante de armas que te ofrece un trabajo. Es una oportunidad para ganar dinero rápido, pero el riesgo es alto.",
+                choices: [
+                    { text: "Aceptar el trabajo de Little Jacob.", nextSceneId: 'escena2_jacob' },
+                    { text: "Negarte y volver a la casa de Roman para ayudarlo.", nextSceneId: 'escena1_ayudar_roman' },
+                    { text: "Robar a Little Jacob y huir con sus armas.", nextSceneId: 'final_jacob_robo' },
+                    { text: "Decirle a Roman que no quieres volver a tu pasado.", nextSceneId: 'final_huida' }
+                ]
+            },
+            'escena2_prestamista': {
+                text: "Encuentras al prestamista de Roman. Es un tipo duro, rodeado de sus matones. 'Tu primo Roman no ha pagado sus deudas. Y ahora tú vas a pagar por él.' te dice. Te obliga a hacer un trabajo para él: asesinar a un hombre que le debe dinero. ¿Aceptas?",
+                choices: [
+                    { text: "Aceptar el trabajo de asesinato.", nextSceneId: 'final_asesinato' },
+                    { text: "Rechazar el trabajo y luchar contra los matones.", nextSceneId: 'final_pelea_prestamista' },
+                    { text: "Intentar negociar con el prestamista.", nextSceneId: 'final_negociar_prestamista' },
+                    { text: "Huir del lugar, abandonando a Roman.", nextSceneId: 'final_huida_prestamista' }
+                ]
+            },
+            'final_roman_solo': {
+                text: "Te niegas a ayudar a Roman. Lo dejas solo y te vas a buscar tu propia vida en la ciudad. Roman es asesinado por los prestamistas. Tu pasado te ha alcanzado, pero esta vez, has sobrevivido solo. Fin de la historia.",
+                choices: []
+            },
+            'escena2_arma_militar': {
+                text: "Buscas tus viejos contactos militares. Consigues un arma, pero también te encuentras con un excompañero del ejército que te recuerda las atrocidades que cometieron en el pasado. 'El pasado siempre vuelve, Niko. No puedes huir de lo que hiciste.' Te das cuenta de que el prestamista de Roman es el mismo hombre que te traicionó en el pasado. ¿Qué harás?",
+                choices: [
+                    { text: "Matar al prestamista para vengarte.", nextSceneId: 'final_venganza_militar' },
+                    { text: "Intentar negociar con el prestamista.", nextSceneId: 'final_negociar_prestamista' },
+                    { text: "Huir del lugar, abandonando a Roman.", nextSceneId: 'final_huida_prestamista' },
+                    { text: "Confrontar a tu excompañero del ejército.", nextSceneId: 'final_traicion_militar' }
+                ]
+            },
+            'final_huida': {
+                text: "Intentas huir de Liberty City con Roman. Te matan en el puerto por no haber pagado las deudas de Roman. Fin de la historia.",
+                choices: []
+            },
+            'escena2_taxista': {
+                text: "Trabajas como taxista para pagar las deudas de Roman. Conoces a mucha gente, pero el dinero es escaso. Un día, un cliente te da una propina generosa. 'Trabajas para mí, o te mato.' te dice. Te das cuenta de que el mundo criminal te ha encontrado. ¿Qué harás?",
+                choices: [
+                    { text: "Aceptar el trabajo del cliente.", nextSceneId: 'final_cliente_trabajo' },
+                    { text: "Rechazar el trabajo y luchar contra el cliente.", nextSceneId: 'final_pelea_cliente' },
+                    { text: "Intentar huir del cliente.", nextSceneId: 'final_huida_cliente' },
+                    { text: "Intentar negociar con el cliente.", nextSceneId: 'final_negociar_cliente' }
+                ]
+            },
+            'escena2_robo': {
+                text: "Robas a un rival de Roman. Ganas mucho dinero, pero te das cuenta de que el robo es un camino sin retorno. Roman te felicita, pero te mira con una sonrisa malvada. 'Sabía que podías hacerlo, primo. Ahora, ¿qué tal si robamos a más gente?' Te das cuenta de que Roman te está usando.",
+                choices: [
+                    { text: "Aceptar el plan de Roman.", nextSceneId: 'final_robo_roman' },
+                    { text: "Rechazar el plan y confrontar a Roman.", nextSceneId: 'final_confrontar_roman_2' },
+                    { text: "Huir con el dinero, abandonando a Roman.", nextSceneId: 'final_huida_dinero' },
+                    { text: "Llamar a los prestamistas y entregar a Roman.", nextSceneId: 'final_traicion_roman' }
+                ]
+            },
+            'escena2_investigar_dimitri': {
+                text: "Investigas a Dimitri Rascalov, el prestamista de Roman. Descubres que es un hombre peligroso, con conexiones en el submundo criminal. Te das cuenta de que la única forma de salvar a Roman es matarlo, pero eso te sumergirá de nuevo en el mundo de la violencia.",
+                choices: [
+                    { text: "Matar a Dimitri Rascalov.", nextSceneId: 'final_asesinato_dimitri' },
+                    { text: "Intentar negociar con Dimitri Rascalov.", nextSceneId: 'final_negociar_dimitri' },
+                    { text: "Huir de la ciudad, abandonando a Roman.", nextSceneId: 'final_huida_prestamista' },
+                    { text: "Pedir ayuda a Roman.", nextSceneId: 'final_ayuda_roman' }
+                ]
+            },
+            'escena2_paquete': {
+                text: "Recoges el paquete para el gánster. El paquete contiene un arma. Te das cuenta de que el gánster te ha usado para un trabajo sucio. Te amenaza con matarte si no lo haces. 'Ahora, eres mío. Te necesito para un trabajo más grande.' ¿Qué harás?",
+                choices: [
+                    { text: "Aceptar el trabajo del gánster.", nextSceneId: 'final_paquete_trabajo' },
+                    { text: "Rechazar el trabajo y luchar contra el gánster.", nextSceneId: 'final_pelea_gánster' },
+                    { text: "Intentar huir del gánster.", nextSceneId: 'final_huida_gánster' },
+                    { text: "Intentar negociar con el gánster.", nextSceneId: 'final_negociar_gánster' }
+                ]
+            },
+            'final_doble_cruz': {
+                text: "Robas al gánster y huyes con el paquete. El paquete contiene dinero. Te das cuenta de que el robo es un camino sin retorno. Te matan en un asalto. Fin de la historia.",
+                choices: []
+            },
+            'final_contacto_militar': {
+                text: "Preguntas al gánster si tiene algún contacto militar. Él se ríe de ti y te dice que no confía en nadie. Te mata. Fin de la historia.",
+                choices: []
+            },
+            'escena2_jacob': {
+                text: "Aceptas el trabajo de Little Jacob. Te pide que le ayudes a matar a un rival. Te das cuenta de que el mundo criminal te ha encontrado de nuevo. 'El pasado siempre vuelve, Niko. No puedes huir de lo que hiciste.' te dice. ¿Qué harás?",
+                choices: [
+                    { text: "Matar al rival.", nextSceneId: 'final_asesinato_jacob' },
+                    { text: "Rechazar el trabajo y luchar contra Jacob.", nextSceneId: 'final_pelea_jacob' },
+                    { text: "Intentar huir de Jacob.", nextSceneId: 'final_huida_jacob' },
+                    { text: "Intentar negociar con Jacob.", nextSceneId: 'final_negociar_jacob' }
+                ]
+            },
+            'final_jacob_robo': {
+                text: "Robas a Little Jacob y huyes con sus armas. Te das cuenta de que el robo es un camino sin retorno. Te matan en un asalto. Fin de la historia.",
+                choices: []
+            },
+            'final_asesinato': {
+                text: "Aceptas el trabajo de asesinato. Matas al hombre que le debe dinero al prestamista. El prestamista te felicita, pero te mira con una sonrisa malvada. 'Ahora, eres mío. Te necesito para un trabajo más grande.' Te das cuenta de que has vuelto a la violencia. Fin de la historia.",
+                choices: []
+            },
+            'final_pelea_prestamista': {
+                text: "Rechazas el trabajo y luchas contra los matones. Son demasiados. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_negociar_prestamista': {
+                text: "Intentas negociar con el prestamista. Él se ríe de ti y te dice que no confía en nadie. Te mata. Fin de la historia.",
+                choices: []
+            },
+            'final_huida_prestamista': {
+                text: "Huyes del lugar, abandonando a Roman. El prestamista lo mata. Te das cuenta de que tu pasado te ha alcanzado. Te matan en un asalto. Fin de la historia.",
+                choices: []
+            },
+            'final_venganza_militar': {
+                text: "Matas al prestamista para vengarte. Te das cuenta de que la venganza es un camino sin retorno. Te matan en un asalto. Fin de la historia.",
+                choices: []
+            },
+            'final_traicion_militar': {
+                text: "Confrontas a tu excompañero del ejército. Él se ríe de ti y te dice que no te traicionó, que te salvaste. Te mata. Fin de la historia.",
+                choices: []
+            },
+            'final_cliente_trabajo': {
+                text: "Aceptas el trabajo del cliente. Te pide que le ayudes a matar a un rival. Te das cuenta de que el mundo criminal te ha encontrado de nuevo. 'El pasado siempre vuelve, Niko. No puedes huir de lo que hiciste.' te dice. Fin de la historia.",
+                choices: []
+            },
+            'final_pelea_cliente': {
+                text: "Rechazas el trabajo y luchas contra el cliente. Son demasiados. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_huida_cliente': {
+                text: "Intentas huir del cliente. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_negociar_cliente': {
+                text: "Intentas negociar con el cliente. Él se ríe de ti y te dice que no confía en nadie. Te mata. Fin de la historia.",
+                choices: []
+            },
+            'final_robo_roman': {
+                text: "Aceptas el plan de Roman. Robas a más gente, pero te das cuenta de que te está usando. Te matan en un asalto. Fin de la historia.",
+                choices: []
+            },
+            'final_confrontar_roman_2': {
+                text: "Rechazas el plan de Roman y lo confrontas. Él se enoja y te traiciona, entregándote a los prestamistas. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_huida_dinero': {
+                text: "Huyes con el dinero, abandonando a Roman. Te das cuenta de que tu pasado te ha alcanzado. Te matan en un asalto. Fin de la historia.",
+                choices: []
+            },
+            'final_traicion_roman': {
+                text: "Llamas a los prestamistas y entregas a Roman. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_asesinato_dimitri': {
+                text: "Matas a Dimitri Rascalov. Te das cuenta de que la violencia es un camino sin retorno. Te matan en un asalto. Fin de la historia.",
+                choices: []
+            },
+            'final_negociar_dimitri': {
+                text: "Intentas negociar con Dimitri Rascalov. Él se ríe de ti y te dice que no confía en nadie. Te mata. Fin de la historia.",
+                choices: []
+            },
+            'final_ayuda_roman': {
+                text: "Pides ayuda a Roman. Él se asusta y huye. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_paquete_trabajo': {
+                text: "Aceptas el trabajo del gánster. Te pide que le ayudes a matar a un rival. Te das cuenta de que el mundo criminal te ha encontrado de nuevo. 'El pasado siempre vuelve, Niko. No puedes huir de lo que hiciste.' te dice. Fin de la historia.",
+                choices: []
+            },
+            'final_pelea_gánster': {
+                text: "Rechazas el trabajo y luchas contra el gánster. Son demasiados. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_huida_gánster': {
+                text: "Intentas huir del gánster. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_negociar_gánster': {
+                text: "Intentas negociar con el gánster. Él se ríe de ti y te dice que no confía en nadie. Te mata. Fin de la historia.",
+                choices: []
+            },
+            'final_asesinato_jacob': {
+                text: "Matas al rival. Te das cuenta de que la violencia es un camino sin retorno. Te matan en un asalto. Fin de la historia.",
+                choices: []
+            },
+            'final_pelea_jacob': {
+                text: "Rechazas el trabajo y luchas contra Jacob. Son demasiados. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_huida_jacob': {
+                text: "Intentas huir de Jacob. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_negociar_jacob': {
+                text: "Intentas negociar con Jacob. Él se ríe de ti y te dice que no confía en nadie. Te mata. Fin de la historia.",
+                choices: []
+            }
+        };
+
+        let currentSceneId = 'start';
+
+        function loadScene(sceneId) {
+            const scene = story[sceneId];
+            if (!scene) {
+                console.error("Escena no encontrada:", sceneId);
+                return;
+            }
+
+            const storyText = document.getElementById('story-text');
+            const choicesContainer = document.getElementById('choices-container');
+            
+            // Animación para el texto
+            storyText.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+            setTimeout(() => {
+                storyText.textContent = scene.text;
+                storyText.classList.remove('opacity-0');
+            }, 250);
+
+            choicesContainer.innerHTML = '';
+            
+            if (scene.choices && scene.choices.length > 0) {
+                scene.choices.forEach(choice => {
+                    const button = document.createElement('button');
+                    button.textContent = choice.text;
+                    button.className = 'w-full px-6 py-4 bg-gray-800 text-red-500 font-bold rounded-md shadow-md border-2 border-red-500 hover:bg-red-500 hover:text-white focus:outline-none focus:ring-4 focus:ring-red-500 focus:ring-opacity-50';
+                    button.onclick = () => loadScene(choice.nextSceneId);
+                    choicesContainer.appendChild(button);
+                });
+            } else {
+                const endMessage = document.createElement('p');
+                endMessage.textContent = "Fin de la historia. ¡Gracias por jugar!";
+                endMessage.className = 'text-center text-2xl font-bold mt-8 text-red-500';
+                choicesContainer.appendChild(endMessage);
+
+                const restartButton = document.createElement('button');
+                restartButton.textContent = "Reiniciar juego";
+                restartButton.className = 'w-1/2 mx-auto mt-6 px-6 py-4 bg-gray-800 text-red-500 font-bold rounded-md shadow-md border-2 border-red-500 hover:bg-red-500 hover:text-white focus:outline-none focus:ring-4 focus:ring-red-500 focus:ring-opacity-50';
+                restartButton.onclick = () => loadScene('start');
+                choicesContainer.appendChild(restartButton);
+            }
+        }
+
+        window.onload = () => {
+            loadScene(currentSceneId);
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historias de Los Santos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap');
+        body {
+            font-family: 'Oswald', sans-serif;
+            background: linear-gradient(135deg, #0d1a26 0%, #060d14 100%);
+            color: #d1d5db; /* Texto gris claro */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .game-container {
+            max-width: 960px;
+            width: 100%;
+            background-color: #1a1a1a;
+            border: 2px solid #ff9100; /* Borde naranja */
+        }
+        .story-text {
+            line-height: 1.8;
+            font-size: 1.125rem; /* text-lg */
+        }
+        .choices-container button {
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+            text-align: left;
+        }
+        .choices-container button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+            background-color: #ffb74d; /* Naranja claro para el hover */
+            color: #1a1a1a;
+        }
+        .logo-text {
+            text-shadow: 0 0 10px #ff9100, 0 0 20px #ff9100;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="game-container rounded-lg shadow-2xl p-8 md:p-12">
+        <h1 class="text-5xl font-bold text-center text-gray-100 mb-6 tracking-wide logo-text">Historias de Los Santos</h1>
+        <hr class="border-orange-500 mb-8">
+        
+        <div id="story-text" class="story-text mb-8 overflow-y-auto max-h-[60vh] md:max-h-[70vh]">
+            <!-- El texto de la historia se cargará aquí -->
+        </div>
+
+        <div id="choices-container" class="choices-container grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+            <!-- Los botones de elecciones se cargarán aquí -->
+        </div>
+
+    </div>
+
+    <script>
+        // Objeto que contiene todas las escenas del juego y sus opciones.
+        const story = {
+            'start': {
+                text: "En la soleada y retorcida metrópolis de Los Santos, las vidas de tres hombres se cruzan de forma explosiva. Un plan para un robo sale mal, y sus destinos quedan entrelazados para siempre. Tienes el poder de elegir su camino. ¿A quién quieres guiar en este viaje?",
+                choices: [
+                    { text: "Seguir la historia de **Michael**, el ladrón de bancos retirado.", nextSceneId: 'michael_start' },
+                    { text: "Seguir la historia de **Franklin**, el joven estafador de la calle.", nextSceneId: 'franklin_start' },
+                    { text: "Seguir la historia de **Trevor**, el psicópata impredecible.", nextSceneId: 'trevor_start' }
+                ]
+            },
+            'michael_start': {
+                text: "Como Michael, vives una vida de lujo forzada en un barrio elegante. Tu familia te desprecia y tu terapeuta te aburre. Todo se desmorona cuando, por accidente, tiras la casa de un poderoso gánster mexicano, Martin Madrazo. Ahora le debes una fortuna. Tu único camino es volver a la vida que juraste dejar atrás: el atraco.",
+                choices: [
+                    { text: "Buscar ayuda de tu viejo compañero de crímenes, Franklin.", nextSceneId: 'michael_franklin' },
+                    { text: "Robar un banco para pagar la deuda de inmediato.", nextSceneId: 'final_michael_robo' },
+                    { text: "Intentar negociar con Martin Madrazo.", nextSceneId: 'final_michael_madrazo' },
+                    { text: "Huir de la ciudad y dejar todo atrás.", nextSceneId: 'final_michael_huida' }
+                ]
+            },
+            'franklin_start': {
+                text: "Eres Franklin, un joven estafador que trabaja para un concesionario de coches de lujo. Quieres escapar de tu vida de poca monta y de tu barrio, pero tu mejor amigo, Lamar, te arrastra a situaciones peligrosas. Cuando conoces a Michael, ves la oportunidad de un mentor que puede llevarte a las grandes ligas. La primera prueba es un robo en una joyería.",
+                choices: [
+                    { text: "Aceptar el trabajo de robo de Michael.", nextSceneId: 'franklin_atraco' },
+                    { text: "Rechazar el trabajo y seguir con Lamar.", nextSceneId: 'final_franklin_lamar' },
+                    { text: "Robar el concesionario de coches para saldar tus deudas.", nextSceneId: 'final_franklin_robo' },
+                    { text: "Huir de la ciudad y dejar todo atrás.", nextSceneId: 'final_franklin_huida' }
+                ]
+            },
+            'trevor_start': {
+                text: "Vives en el desierto, vendiendo metanfetamina y sembrando el caos. Eres un psicópata violento e impredecible que no tiene límites. Cuando oyes en las noticias el robo de una joyería, reconoces el estilo de tu viejo amigo, Michael. Te das cuenta de que no está muerto como pensabas y decides ir a buscarlo. La venganza es tu única motivación.",
+                choices: [
+                    { text: "Ir a Los Santos a buscar a Michael.", nextSceneId: 'trevor_michael' },
+                    { text: "Matar a todos los que se interpongan en tu camino para encontrar a Michael.", nextSceneId: 'final_trevor_matanza' },
+                    { text: "Quedarte en el desierto y expandir tu imperio de drogas.", nextSceneId: 'final_trevor_drogas' },
+                    { text: "Huir de la ciudad y empezar de cero.", nextSceneId: 'final_trevor_huida' }
+                ]
+            },
+            'michael_franklin': {
+                text: "Buscas a Franklin y le explicas tu situación. Él acepta ayudarte a pagar la deuda con Madrazo. Juntos, idean un plan para atracar el banco de la ciudad. El atraco es exitoso, pero la policía los persigue. Logran escapar, pero la deuda de Madrazo aún está pendiente. Se dan cuenta de que necesitan más dinero.",
+                choices: [
+                    { text: "Llamar a Trevor para pedirle ayuda.", nextSceneId: 'michael_trevor_ayuda' },
+                    { text: "Robar un tren para conseguir más dinero.", nextSceneId: 'final_michael_tren' },
+                    { text: "Intentar extorsionar a Madrazo.", nextSceneId: 'final_michael_extorsionar' },
+                    { text: "Huir de la ciudad y dejar todo atrás.", nextSceneId: 'final_michael_huida' }
+                ]
+            },
+            'franklin_atraco': {
+                text: "Aceptas el trabajo de atraco de Michael. Juntos, atracan una joyería, pero la policía los persigue. Logran escapar, pero la deuda de Madrazo aún está pendiente. Se dan cuenta de que necesitan más dinero. Michael te dice que la única persona que puede ayudarles es Trevor, su viejo amigo.",
+                choices: [
+                    { text: "Llamar a Trevor para pedirle ayuda.", nextSceneId: 'franklin_trevor_ayuda' },
+                    { text: "Robar un tren para conseguir más dinero.", nextSceneId: 'final_franklin_tren' },
+                    { text: "Intentar extorsionar a Madrazo.", nextSceneId: 'final_franklin_extorsionar' },
+                    { text: "Huir de la ciudad y dejar todo atrás.", nextSceneId: 'final_franklin_huida' }
+                ]
+            },
+            'trevor_michael': {
+                text: "Llegas a Los Santos y te encuentras con Michael. Lo confrontas por haber fingido su muerte. Él te dice que tuvo que hacerlo para escapar de su pasado. Te pide ayuda para atracar un banco y pagar una deuda. Te das cuenta de que no puedes negarte, ya que la oportunidad de volver a robar con Michael es demasiado tentadora.",
+                choices: [
+                    { text: "Aceptar el trabajo de atraco de Michael.", nextSceneId: 'trevor_atraco' },
+                    { text: "Robar un tren para conseguir más dinero.", nextSceneId: 'final_trevor_tren' },
+                    { text: "Intentar extorsionar a Madrazo.", nextSceneId: 'final_trevor_extorsionar' },
+                    { text: "Huir de la ciudad y dejar todo atrás.", nextSceneId: 'final_trevor_huida' }
+                ]
+            },
+            'michael_trevor_ayuda': {
+                text: "Llamas a Trevor. Él llega a Los Santos y se une a la banda. Juntos, idean un plan para robar el banco central. El atraco es exitoso, pero la policía los persigue. Logran escapar, pero la deuda de Madrazo aún está pendiente. Se dan cuenta de que necesitan más dinero.",
+                choices: [
+                    { text: "Hacer un robo a gran escala.", nextSceneId: 'final_robo_final' },
+                    { text: "Huir de la ciudad y dejar todo atrás.", nextSceneId: 'final_michael_huida' },
+                    { text: "Matar a Madrazo.", nextSceneId: 'final_michael_madrazo_2' },
+                    { text: "Entregar a Madrazo a la policía.", nextSceneId: 'final_michael_policia' }
+                ]
+            },
+            'franklin_trevor_ayuda': {
+                text: "Llamas a Trevor. Él llega a Los Santos y se une a la banda. Juntos, idean un plan para robar el banco central. El atraco es exitoso, pero la policía los persigue. Logran escapar, pero la deuda de Madrazo aún está pendiente. Se dan cuenta de que necesitan más dinero.",
+                choices: [
+                    { text: "Hacer un robo a gran escala.", nextSceneId: 'final_robo_final' },
+                    { text: "Huir de la ciudad y dejar todo atrás.", nextSceneId: 'final_franklin_huida' },
+                    { text: "Matar a Madrazo.", nextSceneId: 'final_franklin_madrazo_2' },
+                    { text: "Entregar a Madrazo a la policía.", nextSceneId: 'final_franklin_policia' }
+                ]
+            },
+            'trevor_atraco': {
+                text: "Aceptas el trabajo de atraco de Michael. Juntos, atracan el banco central, pero la policía los persigue. Logran escapar, pero la deuda de Madrazo aún está pendiente. Se dan cuenta de que necesitan más dinero. Michael te dice que la única persona que puede ayudarles es Franklin.",
+                choices: [
+                    { text: "Hacer un robo a gran escala.", nextSceneId: 'final_robo_final' },
+                    { text: "Huir de la ciudad y dejar todo atrás.", nextSceneId: 'final_trevor_huida' },
+                    { text: "Matar a Madrazo.", nextSceneId: 'final_trevor_madrazo_2' },
+                    { text: "Entregar a Madrazo a la policía.", nextSceneId: 'final_trevor_policia' }
+                ]
+            },
+            'final_michael_robo': {
+                text: "Robas un banco para pagar la deuda de Madrazo. La policía te persigue y te mata. Fin de la historia.",
+                choices: []
+            },
+            'final_michael_madrazo': {
+                text: "Intentas negociar con Madrazo. Él se ríe de ti y te mata. Fin de la historia.",
+                choices: []
+            },
+            'final_michael_huida': {
+                text: "Huyes de la ciudad y dejas todo atrás. Te das cuenta de que el pasado siempre vuelve. Te matan en un asalto. Fin de la historia.",
+                choices: []
+            },
+            'final_franklin_lamar': {
+                text: "Rechazas el trabajo de Michael y sigues con Lamar. Los dos se meten en problemas y los matan. Fin de la historia.",
+                choices: []
+            },
+            'final_franklin_robo': {
+                text: "Robas el concesionario de coches. Te matan. Fin de la historia.",
+                choices: []
+            },
+            'final_franklin_huida': {
+                text: "Huyes de la ciudad y dejas todo atrás. Te das cuenta de que el pasado siempre vuelve. Te matan en un asalto. Fin de la historia.",
+                choices: []
+            },
+            'final_trevor_matanza': {
+                text: "Matas a todos los que se interponen en tu camino para encontrar a Michael. Te das cuenta de que la violencia es un camino sin retorno. Te matan en un asalto. Fin de la historia.",
+                choices: []
+            },
+            'final_trevor_drogas': {
+                text: "Te quedas en el desierto y expandes tu imperio de drogas. Te matan en una guerra de drogas. Fin de la historia.",
+                choices: []
+            },
+            'final_trevor_huida': {
+                text: "Huyes de la ciudad y dejas todo atrás. Te das cuenta de que el pasado siempre vuelve. Te matan en un asalto. Fin de la historia.",
+                choices: []
+            },
+            'final_michael_tren': {
+                text: "Robas un tren para conseguir más dinero. La policía te persigue y te mata. Fin de la historia.",
+                choices: []
+            },
+            'final_michael_extorsionar': {
+                text: "Intentas extorsionar a Madrazo. Él se ríe de ti y te mata. Fin de la historia.",
+                choices: []
+            },
+            'final_robo_final': {
+                text: "Hacen un robo a gran escala para pagar la deuda. El atraco es exitoso, pero la policía los persigue. Logran escapar, pero se dan cuenta de que el mundo criminal es un ciclo sin fin. Te matan en un asalto. Fin de la historia.",
+                choices: []
+            },
+            'final_michael_madrazo_2': {
+                text: "Matas a Madrazo. Te das cuenta de que la violencia es un camino sin retorno. Te matan en un asalto. Fin de la historia.",
+                choices: []
+            },
+            'final_michael_policia': {
+                text: "Entregas a Madrazo a la policía. Te das cuenta de que el mundo criminal es un ciclo sin fin. Te matan en un asalto. Fin de la historia.",
+                choices: []
+            },
+            'final_franklin_tren': {
+                text: "Robas un tren para conseguir más dinero. La policía te persigue y te mata. Fin de la historia.",
+                choices: []
+            },
+            'final_franklin_extorsionar': {
+                text: "Intentas extorsionar a Madrazo. Él se ríe de ti y te mata. Fin de la historia.",
+                choices: []
+            },
+            'final_franklin_madrazo_2': {
+                text: "Matas a Madrazo. Te das cuenta de que la violencia es un camino sin retorno. Te matan en un asalto. Fin de la historia.",
+                choices: []
+            },
+            'final_franklin_policia': {
+                text: "Entregas a Madrazo a la policía. Te das cuenta de que el mundo criminal es un ciclo sin fin. Te matan en un asalto. Fin de la historia.",
+                choices: []
+            },
+            'final_trevor_tren': {
+                text: "Robas un tren para conseguir más dinero. La policía te persigue y te mata. Fin de la historia.",
+                choices: []
+            },
+            'final_trevor_extorsionar': {
+                text: "Intentas extorsionar a Madrazo. Él se ríe de ti y te mata. Fin de la historia.",
+                choices: []
+            },
+            'final_trevor_madrazo_2': {
+                text: "Matas a Madrazo. Te das cuenta de que la violencia es un camino sin retorno. Te matan en un asalto. Fin de la historia.",
+                choices: []
+            },
+            'final_trevor_policia': {
+                text: "Entregas a Madrazo a la policía. Te das cuenta de que el mundo criminal es un ciclo sin fin. Te matan en un asalto. Fin de la historia.",
+                choices: []
+            }
+        };
+
+        let currentSceneId = 'start';
+
+        function loadScene(sceneId) {
+            const scene = story[sceneId];
+            if (!scene) {
+                console.error("Escena no encontrada:", sceneId);
+                return;
+            }
+
+            const storyText = document.getElementById('story-text');
+            const choicesContainer = document.getElementById('choices-container');
+            
+            // Animación para el texto
+            storyText.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+            setTimeout(() => {
+                storyText.textContent = scene.text;
+                storyText.classList.remove('opacity-0');
+            }, 250);
+
+            choicesContainer.innerHTML = '';
+            
+            if (scene.choices && scene.choices.length > 0) {
+                scene.choices.forEach(choice => {
+                    const button = document.createElement('button');
+                    button.textContent = choice.text;
+                    // Estilos de los botones inspirados en los logos de GTA V
+                    let buttonStyle = 'w-full px-6 py-4 font-bold rounded-md shadow-md focus:outline-none focus:ring-4 focus:ring-opacity-50';
+                    if (choice.text.includes('Michael')) {
+                        buttonStyle += ' bg-blue-500 text-white border-2 border-blue-600 hover:bg-blue-600 focus:ring-blue-500';
+                    } else if (choice.text.includes('Franklin')) {
+                        buttonStyle += ' bg-green-500 text-white border-2 border-green-600 hover:bg-green-600 focus:ring-green-500';
+                    } else if (choice.text.includes('Trevor')) {
+                        buttonStyle += ' bg-red-500 text-white border-2 border-red-600 hover:bg-red-600 focus:ring-red-500';
+                    } else {
+                        buttonStyle += ' bg-gray-800 text-orange-400 border-2 border-orange-500 hover:bg-orange-500 hover:text-white focus:ring-orange-500';
+                    }
+                    button.className = buttonStyle;
+                    button.onclick = () => loadScene(choice.nextSceneId);
+                    choicesContainer.appendChild(button);
+                });
+            } else {
+                const endMessage = document.createElement('p');
+                endMessage.textContent = "Fin de la historia. ¡Gracias por jugar!";
+                endMessage.className = 'text-center text-2xl font-bold mt-8 text-orange-500';
+                choicesContainer.appendChild(endMessage);
+
+                const restartButton = document.createElement('button');
+                restartButton.textContent = "Reiniciar juego";
+                restartButton.className = 'w-1/2 mx-auto mt-6 px-6 py-4 bg-gray-800 text-orange-400 font-bold rounded-md shadow-md border-2 border-orange-500 hover:bg-orange-500 hover:text-white focus:outline-none focus:ring-4 focus:ring-orange-500 focus:ring-opacity-50';
+                restartButton.onclick = () => loadScene('start');
+                choicesContainer.appendChild(restartButton);
+            }
+        }
+
+        window.onload = () => {
+            loadScene(currentSceneId);
+        };
+    </script>
+</body>
+</html>

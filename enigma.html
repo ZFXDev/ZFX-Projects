@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Enigma del Ojo de la Noche</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1f2937 0%, #0d1216 100%);
+            color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .game-container {
+            max-width: 960px;
+            width: 100%;
+            background-color: #111827;
+            border: 2px solid #374151;
+        }
+        .story-text {
+            line-height: 1.8;
+            font-size: 1.125rem; /* text-lg */
+        }
+        .choices-container button {
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+            text-align: left;
+        }
+        .choices-container button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            background-color: #2563eb;
+        }
+        /* Estilos para el efecto de sombra en el texto */
+        .story-text::after {
+            content: '';
+            display: block;
+            height: 50px;
+            background: linear-gradient(to top, #111827, transparent);
+            margin-top: -50px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="game-container rounded-3xl shadow-2xl p-8 md:p-12">
+        <h1 class="text-5xl font-bold text-center text-indigo-400 mb-6 tracking-wide">El Enigma del Ojo de la Noche</h1>
+        <hr class="border-gray-700 mb-8">
+        
+        <div id="story-text" class="story-text mb-8 overflow-y-auto max-h-[60vh] md:max-h-[70vh]">
+            <!-- El texto de la historia se cargará aquí -->
+        </div>
+
+        <div id="choices-container" class="choices-container grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
+            <!-- Los 4 botones de elecciones se cargarán aquí -->
+        </div>
+
+    </div>
+
+    <script>
+        const story = {
+            'start': {
+                text: "Eres un detective privado, un alma solitaria que encuentra consuelo en el caos. Una noche, un sobre sellado con un emblema de águila dorada llega a tu puerta. Dentro, una nota de Elías Vance, el excéntrico magnate de las antigüedades. 'Mi joya más preciada, el 'Ojo de la Noche', ha sido robada, y con ella, mi tranquilidad. Si aceptas, encuéntrala. El pago será más que generoso'.",
+                choices: [
+                    { text: "Aceptar el caso sin dudarlo, atraído por el desafío y el dinero.", nextSceneId: 'escena1_vance' },
+                    { text: "Investigar a Elías Vance y su reputación antes de tomar una decisión.", nextSceneId: 'escena1_investigar' },
+                    { text: "Consultar a tu contacto en el submundo de la ciudad, 'La Sombra', para saber si tiene información sobre el 'Ojo de la Noche'.", nextSceneId: 'escena1_sombra' },
+                    { text: "Rechazar el caso. El nombre 'Ojo de la Noche' te produce una extraña incomodidad.", nextSceneId: 'final_rechazo' }
+                ]
+            },
+            'escena1_vance': {
+                text: "Llegas a la mansión de Vance, una imponente fortaleza de piedra. Te recibe en su estudio, una habitación llena de reliquias extrañas. Te explica que el 'Ojo de la Noche' es una gema forjada en la oscuridad por una secta olvidada, y que quien la posee es víctima de su maldición. Te muestra un diario antiguo que podría contener la clave del robo.",
+                choices: [
+                    { text: "Analizar la escena del crimen en busca de huellas o pistas obvias.", nextSceneId: 'escena2_huellas' },
+                    { text: "Interrogar al personal de la mansión, especialmente al mayordomo.", nextSceneId: 'escena2_interrogatorio' },
+                    { text: "Tomar el diario antiguo para estudiarlo a fondo en tu oficina.", nextSceneId: 'escena2_diario' },
+                    { text: "Pedirle a Vance que te muestre los registros de compras recientes del 'Ojo'.", nextSceneId: 'escena2_registros' }
+                ]
+            },
+            'escena1_investigar': {
+                text: "Pasas una semana investigando a Elías Vance. Descubres que es un coleccionista obsesionado y que ha tenido problemas con la ley en el pasado por adquisición de artefactos ilegales. También encuentras un viejo periódico que menciona un incendio en una galería de arte, del cual Vance fue el único superviviente. El incendio ocurrió justo después de que Vance comprara el 'Ojo de la Noche'.",
+                choices: [
+                    { text: "Confrontar a Vance sobre el incendio y el 'Ojo'.", nextSceneId: 'escena2_confrontar' },
+                    { text: "Ignorar el pasado y aceptar el caso ahora que tienes más contexto.", nextSceneId: 'escena2_aceptar' },
+                    { text: "Publicar tus hallazgos sobre Vance en el periódico y dejar el caso.", nextSceneId: 'final_publicar' },
+                    { text: "Buscar al antiguo propietario de la galería de arte en busca de más información.", nextSceneId: 'escena2_galeria' }
+                ]
+            },
+            'escena1_sombra': {
+                text: "Te reúnes con 'La Sombra' en un callejón oscuro. Es un hombre de edad avanzada con un pasado turbio, pero con contactos en cada rincón de la ciudad. Después de escuchar tu historia, 'La Sombra' te advierte que el 'Ojo de la Noche' está maldito y que quienes lo han tocado han desaparecido. Te revela que un grupo de ocultistas lo busca, y que su líder, conocido como 'El Vigilante', está cerca de encontrarlo. Te da una dirección que te puede llevar al 'Vigilante'.",
+                choices: [
+                    { text: "Ir directamente a la dirección que te dio 'La Sombra'.", nextSceneId: 'escena2_ocultista' },
+                    { text: "Pedir a 'La Sombra' más detalles sobre la secta antes de actuar.", nextSceneId: 'escena2_secta' },
+                    { text: "Ignorar el consejo de 'La Sombra' e ir a la mansión de Vance.", nextSceneId: 'escena2_ignorar' },
+                    { text: "Preparar un equipo de asalto para enfrentarte a 'El Vigilante'.", nextSceneId: 'escena2_asalto' }
+                ]
+            },
+            'final_rechazo': {
+                text: "Rechazas el caso. Días después, lees en el periódico que Elías Vance ha desaparecido. El misterio del 'Ojo de la Noche' nunca se resuelve. Has evitado un peligro, pero el enigma te perseguirá en tus sueños.",
+                choices: []
+            },
+            'escena2_huellas': {
+                text: "En la escena, encuentras un rastro de polvo oscuro que lleva a un pasadizo secreto. Lo sigues hasta el sótano de la mansión, donde descubres un antiguo altar de piedra. En el centro, hay una ranura vacía, y a su lado, un amuleto con un símbolo extraño. Un escalofrío te recorre la espina dorsal.",
+                choices: [
+                    { text: "Investigar el amuleto y el símbolo en la biblioteca de Vance.", nextSceneId: 'escena3_amuleto' },
+                    { text: "Salir del sótano y enfrentar a Vance con lo que has encontrado.", nextSceneId: 'escena3_enfrentar' },
+                    { text: "Dejar el amuleto en su lugar y seguir buscando pistas.", nextSceneId: 'escena3_dejar' },
+                    { text: "Tomar el amuleto y llevártelo para un análisis más profundo.", nextSceneId: 'escena3_tomar' }
+                ]
+            },
+            'escena2_interrogatorio': {
+                text: "Interrogas al mayordomo, un hombre de edad avanzada, que te confiesa que Elías Vance ha estado actuando de forma extraña últimamente, como si estuviera poseído por algo. Te da un nombre: 'El Vigilante', el líder de una secta de ocultistas que ha estado acosando a Vance desde que adquirió el 'Ojo'. El mayordomo te advierte que 'El Vigilante' podría estar cerca.",
+                choices: [
+                    { text: "Buscar al 'Vigilante' en los registros de la ciudad.", nextSceneId: 'escena3_buscar' },
+                    { text: "Seguir investigando la mansión en busca de pistas del 'Vigilante'.", nextSceneId: 'escena3_investigar' },
+                    { text: "Pedir al mayordomo que te cuente más sobre la secta.", nextSceneId: 'escena3_secta' },
+                    { text: "Ignorar la advertencia del mayordomo, pensando que está loco.", nextSceneId: 'final_loco' }
+                ]
+            },
+            'escena2_diario': {
+                text: "Pasas la noche entera descifrando el diario de Vance. Descubres que el 'Ojo de la Noche' no es solo una joya, sino una llave para abrir un portal a otra dimensión. El diario menciona un ritual y un lugar secreto, pero está incompleto. De repente, una figura oscura entra en tu oficina y se abalanza sobre ti. Es 'El Vigilante'.",
+                choices: [
+                    { text: "Atacar al 'Vigilante' para defenderte.", nextSceneId: 'final_pelea' },
+                    { text: "Escapar por la ventana y pedir ayuda a la policía.", nextSceneId: 'final_escapar' },
+                    { text: "Ofrecerle el diario a cambio de tu vida.", nextSceneId: 'final_ofrecer' },
+                    { text: "Intentar razonar con él para que te dé el 'Ojo' y te cuente su historia.", nextSceneId: 'final_razonar' }
+                ]
+            },
+            'escena2_registros': {
+                text: "Elías Vance te entrega los registros de compras. Descubres que el 'Ojo de la Noche' fue adquirido en una subasta ilegal. El nombre del vendedor es desconocido, pero la dirección del almacén es 'Callejón de las Sombras, 13'. Decides ir al almacén para investigar. Al llegar, encuentras una puerta con el mismo emblema de águila dorada que el sobre que te envió Vance. Entras y un pasadizo oscuro te espera.",
+                choices: [
+                    { text: "Entrar al pasadizo para encontrar al vendedor.", nextSceneId: 'escena3_pasadizo' },
+                    { text: "Revisar el almacén en busca de más pistas antes de entrar.", nextSceneId: 'escena3_revisar' },
+                    { text: "Llamar a la policía para que investigue el almacén.", nextSceneId: 'final_policia' },
+                    { text: "Regresar a la mansión de Vance para preguntarle sobre el emblema.", nextSceneId: 'escena3_regresar' }
+                ]
+            },
+            'escena2_confrontar': {
+                text: "Confrontas a Vance sobre el incendio. Se pone pálido y te confiesa que el incendio fue causado por un ritual de la secta de 'El Vigilante', que buscaba el 'Ojo'. Él escapó con el 'Ojo', pero desde entonces ha sido maldecido. Te da la dirección de un santuario oculto donde cree que la secta está guardando el 'Ojo'.",
+                choices: [
+                    { text: "Ir al santuario oculto para recuperar el 'Ojo'.", nextSceneId: 'escena3_santuario' },
+                    { text: "Pedirle a Vance que te acompañe para que te guíe.", nextSceneId: 'escena3_vance' },
+                    { text: "Entregar a Vance a la policía por la adquisición ilegal del 'Ojo'.", nextSceneId: 'final_entregar' },
+                    { text: "Ignorar su confesión y seguir investigando por tu cuenta.", nextSceneId: 'escena3_ignorar_2' }
+                ]
+            },
+            'escena2_aceptar': {
+                text: "Aceptas el caso, pero ahora con más información. Vance te recibe y te da el diario. Pasa la noche entera descifrando el diario y descubres que el 'Ojo' no es solo una joya, sino una llave para abrir un portal a otra dimensión. El diario menciona un ritual y un lugar secreto, pero está incompleto. De repente, una figura oscura entra en tu oficina y se abalanza sobre ti. Es 'El Vigilante'.",
+                choices: [
+                    { text: "Atacar al 'Vigilante' para defenderte.", nextSceneId: 'final_pelea' },
+                    { text: "Escapar por la ventana y pedir ayuda a la policía.", nextSceneId: 'final_escapar' },
+                    { text: "Ofrecerle el diario a cambio de tu vida.", nextSceneId: 'final_ofrecer' },
+                    { text: "Intentar razonar con él para que te dé el 'Ojo' y te cuente su historia.", nextSceneId: 'final_razonar' }
+                ]
+            },
+            'final_publicar': {
+                text: "Publicas tus hallazgos en el periódico. Elías Vance es arrestado, pero el 'Ojo de la Noche' y su misterio siguen sin resolverse. El caso se cierra, pero el 'Ojo' sigue perdido en algún lugar, esperando a ser encontrado por alguien más.",
+                choices: []
+            },
+            'escena2_galeria': {
+                text: "Contactas al antiguo propietario de la galería de arte, un anciano llamado 'El Guardián'. Te confiesa que el 'Ojo' fue robado de su galería por la secta de 'El Vigilante', quienes lo guardan en un santuario oculto. Él escapó, pero un rastro de polvo oscuro, el mismo que encontraste en la mansión de Vance, es lo que lo conectó a ellos. Te da un mapa que te lleva al santuario.",
+                choices: [
+                    { text: "Ir al santuario para recuperar el 'Ojo'.", nextSceneId: 'escena3_santuario' },
+                    { text: "Pedir al 'Guardián' que te acompañe para que te guíe.", nextSceneId: 'escena3_guardian' },
+                    { text: "Entregar el mapa a la policía para que investiguen el santuario.", nextSceneId: 'final_policia_2' },
+                    { text: "Buscar más pistas sobre el 'Ojo' antes de ir al santuario.", nextSceneId: 'escena3_ignorar_2' }
+                ]
+            },
+            'escena2_ocultista': {
+                text: "La dirección que te da 'La Sombra' te lleva a un antiguo almacén abandonado. Al entrar, encuentras una sala secreta, con un altar de piedra, el mismo que encontraste en la mansión de Vance. En el centro, el 'Ojo de la Noche' emite una luz oscura. De repente, una figura oscura se abalanza sobre ti. Es 'El Vigilante'.",
+                choices: [
+                    { text: "Atacar al 'Vigilante' para defenderte.", nextSceneId: 'final_pelea' },
+                    { text: "Escapar por la ventana y pedir ayuda a la policía.", nextSceneId: 'final_escapar' },
+                    { text: "Ofrecerle el 'Ojo' a cambio de tu vida.", nextSceneId: 'final_ofrecer_2' },
+                    { text: "Intentar razonar con él para que te cuente su historia.", nextSceneId: 'final_razonar' }
+                ]
+            },
+            'escena2_secta': {
+                text: "'La Sombra' te cuenta que la secta es un grupo de ocultistas que adoran a una entidad maligna. El 'Ojo' es la llave para invocar a esa entidad. 'La Sombra' te da la dirección de un santuario oculto donde la secta se reúne. Te advierte que es un lugar peligroso y que debes tener cuidado.",
+                choices: [
+                    { text: "Ir al santuario para recuperar el 'Ojo'.", nextSceneId: 'escena3_santuario' },
+                    { text: "Pedir a 'La Sombra' que te acompañe para que te guíe.", nextSceneId: 'escena3_sombra_2' },
+                    { text: "Entregar la dirección a la policía para que investiguen el santuario.", nextSceneId: 'final_policia_2' },
+                    { text: "Buscar más pistas sobre la secta antes de ir al santuario.", nextSceneId: 'escena3_ignorar_2' }
+                ]
+            },
+            'escena2_ignorar': {
+                text: "Ignoras el consejo de 'La Sombra' y vas a la mansión de Vance. Allí, encuentras un rastro de polvo oscuro que te lleva a un pasadizo secreto. Lo sigues hasta el sótano de la mansión, donde descubres un antiguo altar de piedra. En el centro, hay una ranura vacía, y a su lado, un amuleto con un símbolo extraño. Un escalofrío te recorre la espina dorsal.",
+                choices: [
+                    { text: "Investigar el amuleto y el símbolo en la biblioteca de Vance.", nextSceneId: 'escena3_amuleto' },
+                    { text: "Salir del sótano y enfrentar a Vance con lo que has encontrado.", nextSceneId: 'escena3_enfrentar' },
+                    { text: "Dejar el amuleto en su lugar y seguir buscando pistas.", nextSceneId: 'escena3_dejar' },
+                    { text: "Tomar el amuleto y llevártelo para un análisis más profundo.", nextSceneId: 'escena3_tomar' }
+                ]
+            },
+            'escena2_asalto': {
+                text: "Preparas un equipo de asalto para enfrentarte a 'El Vigilante'. Al llegar a la dirección que te dio 'La Sombra', encuentras un antiguo almacén abandonado. Entras y el equipo de asalto se enfrenta a 'El Vigilante' y su secta. La batalla es feroz y, después de mucha lucha, logran atraparlos. El 'Ojo' es recuperado y el caso se cierra.",
+                choices: [
+                    { text: "Final de la historia.", nextSceneId: 'final_asalto' }
+                ]
+            },
+            'escena3_amuleto': {
+                text: "Investigas el amuleto en la biblioteca de Vance. Descubres que el símbolo es el de la 'Orden de la Noche Eterna', una secta de ocultistas que adoraba a una entidad maligna. El amuleto es la llave para abrir el portal a otra dimensión. Un escalofrío te recorre la espina dorsal. Vance aparece detrás de ti, con una sonrisa malévola. 'Lo has encontrado', te dice. 'Ahora, dame el amuleto'.",
+                choices: [
+                    { text: "Luchar contra Vance para conseguir el amuleto.", nextSceneId: 'final_luchar' },
+                    { text: "Huir con el amuleto para que Vance no lo consiga.", nextSceneId: 'final_huir' },
+                    { text: "Ofrecerle el amuleto a cambio de tu vida.", nextSceneId: 'final_ofrecer' },
+                    { text: "Intentar razonar con Vance para que te cuente su historia.", nextSceneId: 'final_razonar' }
+                ]
+            },
+            'escena3_enfrentar': {
+                text: "Enfrentas a Vance con el amuleto. Se ríe de ti y te confiesa que es el líder de la 'Orden de la Noche Eterna', y que usará el 'Ojo' para invocar a la entidad maligna. Te apunta con un arma y te pide que le des el amuleto. ¿Qué harás?",
+                choices: [
+                    { text: "Luchar contra Vance para conseguir el amuleto.", nextSceneId: 'final_luchar' },
+                    { text: "Huir con el amuleto para que Vance no lo consiga.", nextSceneId: 'final_huir' },
+                    { text: "Ofrecerle el amuleto a cambio de tu vida.", nextSceneId: 'final_ofrecer' },
+                    { text: "Intentar razonar con Vance para que te cuente su historia.", nextSceneId: 'final_razonar' }
+                ]
+            },
+            'escena3_dejar': {
+                text: "Dejas el amuleto en su lugar y sigues buscando pistas. Descubres que Vance es un miembro de la 'Orden de la Noche Eterna'. Vance te encuentra en la biblioteca, con el amuleto en la mano. Te apunta con un arma y te pide que le entregues el amuleto. ¿Qué harás?",
+                choices: [
+                    { text: "Luchar contra Vance para conseguir el amuleto.", nextSceneId: 'final_luchar' },
+                    { text: "Huir con el amuleto para que Vance no lo consiga.", nextSceneId: 'final_huir' },
+                    { text: "Ofrecerle el amuleto a cambio de tu vida.", nextSceneId: 'final_ofrecer' },
+                    { text: "Intentar razonar con Vance para que te cuente su historia.", nextSceneId: 'final_razonar' }
+                ]
+            },
+            'escena3_tomar': {
+                text: "Tomas el amuleto y te lo llevas a tu oficina. Vance te persigue, te encuentra y te pide que le des el amuleto. Te confiesa que es el líder de la 'Orden de la Noche Eterna', y que usará el 'Ojo' para invocar a la entidad maligna. Te apunta con un arma. ¿Qué harás?",
+                choices: [
+                    { text: "Luchar contra Vance para conseguir el amuleto.", nextSceneId: 'final_luchar' },
+                    { text: "Huir con el amuleto para que Vance no lo consiga.", nextSceneId: 'final_huir' },
+                    { text: "Ofrecerle el amuleto a cambio de tu vida.", nextSceneId: 'final_ofrecer' },
+                    { text: "Intentar razonar con Vance para que te cuente su historia.", nextSceneId: 'final_razonar' }
+                ]
+            },
+            'final_loco': {
+                text: "Ignoras la advertencia del mayordomo, pensando que está loco. Días después, lees en el periódico que el mayordomo ha desaparecido. El misterio del 'Ojo de la Noche' nunca se resuelve. El caso se cierra, pero el 'Ojo' sigue perdido en algún lugar, esperando a ser encontrado por alguien más.",
+                choices: []
+            },
+            'final_pelea': {
+                text: "Atacas al 'Vigilante' para defenderte. La pelea es brutal, pero logras vencerlo. Te confiesa que el 'Ojo' es la llave para invocar a una entidad maligna y que la secta buscaba el amuleto para abrir el portal. Entregas el 'Vigilante' a la policía y el 'Ojo' es recuperado. El caso se cierra.",
+                choices: []
+            },
+            'final_escapar': {
+                text: "Escapas por la ventana y pides ayuda a la policía. Cuando regresan a tu oficina, el 'Vigilante' y el diario han desaparecido. El caso del 'Ojo de la Noche' se cierra sin resolverse, pero el 'Vigilante' sigue libre. El enigma te perseguirá en tus sueños.",
+                choices: []
+            },
+            'final_ofrecer': {
+                text: "Le ofreces el diario a cambio de tu vida. El 'Vigilante' acepta, te deja ir y se va con el diario. El caso se cierra, pero el 'Ojo' sigue perdido en algún lugar. El enigma te perseguirá en tus sueños.",
+                choices: []
+            },
+            'final_razonar': {
+                text: "Intentas razonar con 'El Vigilante'. Te confiesa que el 'Ojo' es la llave para invocar a una entidad maligna. Él no quiere que el portal se abra, por eso lo robó. Te ofrece una alianza para detener a la secta. Te unes a él y, juntos, logran detener a la secta y destruir el 'Ojo'. El caso se cierra.",
+                choices: []
+            },
+            'final_policia': {
+                text: "Llamas a la policía para que investigue el almacén. La policía encuentra el pasadizo, pero el almacén está vacío. El 'Vigilante' se ha escapado y el 'Ojo' sigue perdido en algún lugar. El caso se cierra, pero el enigma te perseguirá en tus sueños.",
+                choices: []
+            },
+            'final_entregar': {
+                text: "Entregas a Vance a la policía por la adquisición ilegal del 'Ojo'. El caso se cierra, pero el 'Ojo' sigue perdido en algún lugar. El enigma te perseguirá en tus sueños.",
+                choices: []
+            },
+            'final_asalto': {
+                text: "El equipo de asalto logra capturar a 'El Vigilante' y a su secta. El 'Ojo' es recuperado y el caso se cierra. Has salvado a la ciudad de una amenaza sobrenatural.",
+                choices: []
+            },
+            'final_ofrecer_2': {
+                text: "Le ofreces el 'Ojo' a cambio de tu vida. 'El Vigilante' acepta, te deja ir y se va con el 'Ojo'. El caso se cierra, pero el 'Ojo' sigue perdido en algún lugar. El enigma te perseguirá en tus sueños.",
+                choices: []
+            },
+            'final_policia_2': {
+                text: "Entregas la dirección a la policía para que investiguen el santuario. La policía encuentra el santuario, pero el 'Ojo' y la secta se han escapado. El caso se cierra, pero el 'Ojo' sigue perdido en algún lugar. El enigma te perseguirá en tus sueños.",
+                choices: []
+            },
+            'escena3_pasadizo': {
+                text: "Entras al pasadizo oscuro. De repente, una figura oscura se abalanza sobre ti. Es 'El Vigilante'. Te confiesa que él robó el 'Ojo' para evitar que Vance abriera el portal a otra dimensión. Te da a elegir: 'Únete a mí y detengamos a Vance, o muere'.",
+                choices: [
+                    { text: "Unirte a 'El Vigilante'.", nextSceneId: 'final_unirse' },
+                    { text: "Negarte a unirte a él.", nextSceneId: 'final_negarse' },
+                    { text: "Atacarlo para defenderte.", nextSceneId: 'final_pelea' },
+                    { text: "Huir del pasadizo para pedir ayuda.", nextSceneId: 'final_escapar' }
+                ]
+            },
+            'escena3_revisar': {
+                text: "Revisas el almacén. Encuentras un libro antiguo con el mismo emblema de águila dorada que el sobre que te envió Vance. Dentro, hay un mapa que te lleva a un santuario oculto. Un escalofrío te recorre la espina dorsal. Decides ir al santuario para investigar.",
+                choices: [
+                    { text: "Ir al santuario para recuperar el 'Ojo'.", nextSceneId: 'escena3_santuario' },
+                    { text: "Pedir a 'La Sombra' que te acompañe para que te guíe.", nextSceneId: 'escena3_sombra_2' },
+                    { text: "Entregar la dirección a la policía para que investiguen el santuario.", nextSceneId: 'final_policia_2' },
+                    { text: "Buscar más pistas sobre la secta antes de ir al santuario.", nextSceneId: 'escena3_ignorar_2' }
+                ]
+            },
+            'escena3_regresar': {
+                text: "Regresas a la mansión de Vance. Lo confrontas sobre el emblema de águila dorada. Te confiesa que es el líder de la 'Orden de la Noche Eterna', y que el emblema es el símbolo de la secta. Te apunta con un arma y te pide que le des el amuleto. ¿Qué harás?",
+                choices: [
+                    { text: "Luchar contra Vance para conseguir el amuleto.", nextSceneId: 'final_luchar' },
+                    { text: "Huir con el amuleto para que Vance no lo consiga.", nextSceneId: 'final_huir' },
+                    { text: "Ofrecerle el amuleto a cambio de tu vida.", nextSceneId: 'final_ofrecer' },
+                    { text: "Intentar razonar con Vance para que te cuente su historia.", nextSceneId: 'final_razonar' }
+                ]
+            },
+            'escena3_santuario': {
+                text: "Llegas al santuario, un antiguo templo escondido en el bosque. El 'Ojo de la Noche' está en un altar, rodeado de miembros de la secta de 'El Vigilante'. Te enfrentas a ellos, pero son demasiado numerosos. 'El Vigilante' te pide que te unas a ellos y lo ayudes a invocar a la entidad maligna. Te da a elegir: 'Únete a nosotros y tendrás poder, o muere'.",
+                choices: [
+                    { text: "Unirte a la secta.", nextSceneId: 'final_unirse_2' },
+                    { text: "Negarte a unirte a ellos.", nextSceneId: 'final_negarse_2' },
+                    { text: "Luchar contra ellos para defenderte.", nextSceneId: 'final_pelea_2' },
+                    { text: "Huir del santuario para pedir ayuda.", nextSceneId: 'final_escapar_2' }
+                ]
+            },
+            'escena3_vance': {
+                text: "Le pides a Vance que te acompañe. Juntos, van al santuario. Al llegar, Vance te confiesa que él es el líder de la secta y que te ha engañado para que lo ayudes a abrir el portal. Te apunta con un arma y te pide que te unas a él. ¿Qué harás?",
+                choices: [
+                    { text: "Unirte a él.", nextSceneId: 'final_unirse_2' },
+                    { text: "Negarte a unirte a él.", nextSceneId: 'final_negarse_2' },
+                    { text: "Luchar contra él para defenderte.", nextSceneId: 'final_pelea_2' },
+                    { text: "Huir del santuario para pedir ayuda.", nextSceneId: 'final_escapar_2' }
+                ]
+            },
+            'escena3_ignorar_2': {
+                text: "Ignoras la confesión de Vance y buscas más pistas. Descubres que Vance es un miembro de la 'Orden de la Noche Eterna'. Vance te encuentra en la biblioteca, con el amuleto en la mano. Te apunta con un arma y te pide que le entregues el amuleto. ¿Qué harás?",
+                choices: [
+                    { text: "Luchar contra Vance para conseguir el amuleto.", nextSceneId: 'final_luchar' },
+                    { text: "Huir con el amuleto para que Vance no lo consiga.", nextSceneId: 'final_huir' },
+                    { text: "Ofrecerle el amuleto a cambio de tu vida.", nextSceneId: 'final_ofrecer' },
+                    { text: "Intentar razonar con Vance para que te cuente su historia.", nextSceneId: 'final_razonar' }
+                ]
+            },
+            'escena3_guardian': {
+                text: "Le pides al 'Guardián' que te acompañe. Juntos, van al santuario. Al llegar, el 'Guardián' te confiesa que es el líder de la secta y que te ha engañado para que lo ayudes a abrir el portal. Te apunta con un arma y te pide que te unas a él. ¿Qué harás?",
+                choices: [
+                    { text: "Unirte a él.", nextSceneId: 'final_unirse_2' },
+                    { text: "Negarte a unirte a él.", nextSceneId: 'final_negarse_2' },
+                    { text: "Luchar contra él para defenderte.", nextSceneId: 'final_pelea_2' },
+                    { text: "Huir del santuario para pedir ayuda.", nextSceneId: 'final_escapar_2' }
+                ]
+            },
+            'escena3_secta': {
+                text: "Le pides al mayordomo que te cuente más sobre la secta. Te confiesa que es el líder de la secta y que te ha engañado para que lo ayudes a abrir el portal. Te apunta con un arma y te pide que te unas a él. ¿Qué harás?",
+                choices: [
+                    { text: "Unirte a él.", nextSceneId: 'final_unirse_2' },
+                    { text: "Negarte a unirte a él.", nextSceneId: 'final_negarse_2' },
+                    { text: "Luchar contra él para defenderte.", nextSceneId: 'final_pelea_2' },
+                    { text: "Huir del santuario para pedir ayuda.", nextSceneId: 'final_escapar_2' }
+                ]
+            },
+            'escena3_sombra_2': {
+                text: "Le pides a 'La Sombra' que te acompañe. Juntos, van al santuario. Al llegar, 'La Sombra' te confiesa que es el líder de la secta y que te ha engañado para que lo ayudes a abrir el portal. Te apunta con un arma y te pide que te unas a él. ¿Qué harás?",
+                choices: [
+                    { text: "Unirte a él.", nextSceneId: 'final_unirse_2' },
+                    { text: "Negarte a unirte a él.", nextSceneId: 'final_negarse_2' },
+                    { text: "Luchar contra él para defenderte.", nextSceneId: 'final_pelea_2' },
+                    { text: "Huir del santuario para pedir ayuda.", nextSceneId: 'final_escapar_2' }
+                ]
+            },
+            'final_unirse': {
+                text: "Te unes a 'El Vigilante'. Juntos, detienen a Vance y evitan que abra el portal. El 'Ojo' es destruido y la ciudad está a salvo. Has salvado a la ciudad de una amenaza sobrenatural.",
+                choices: []
+            },
+            'final_negarse': {
+                text: "Te niegas a unirte a 'El Vigilante'. Te ataca y, después de una feroz batalla, logra vencerte. El caso del 'Ojo de la Noche' se cierra sin resolverse. El enigma te perseguirá en tus sueños.",
+                choices: []
+            },
+            'final_unirse_2': {
+                text: "Te unes a la secta. Juntos, invocan a la entidad maligna. El mundo es consumido por la oscuridad. Has condenado a la humanidad.",
+                choices: []
+            },
+            'final_negarse_2': {
+                text: "Te niegas a unirte a la secta. Te atacan y, después de una feroz batalla, logran vencerte. El caso del 'Ojo de la Noche' se cierra sin resolverse. El enigma te perseguirá en tus sueños.",
+                choices: []
+            },
+            'final_pelea_2': {
+                text: "Luchas contra la secta. Después de una feroz batalla, logras vencerlos. El 'Ojo' es recuperado y el caso se cierra. Has salvado a la ciudad de una amenaza sobrenatural.",
+                choices: []
+            },
+            'final_escapar_2': {
+                text: "Huyes del santuario para pedir ayuda. Cuando la policía llega, la secta y el 'Ojo' han desaparecido. El caso del 'Ojo de la Noche' se cierra sin resolverse. El enigma te perseguirá en tus sueños.",
+                choices: []
+            },
+            'final_luchar': {
+                text: "Luchas contra Vance. Después de una feroz batalla, logras vencerlo. El 'Ojo' es recuperado y el caso se cierra. Has salvado a la ciudad de una amenaza sobrenatural.",
+                choices: []
+            },
+            'final_huir': {
+                text: "Huyes de la mansión con el amuleto. Vance te persigue, pero logras escapar. El caso del 'Ojo de la Noche' se cierra sin resolverse, pero el amuleto sigue en tu poder. El enigma te perseguirá en tus sueños.",
+                choices: []
+            },
+        };
+
+        let currentSceneId = 'start';
+
+        function loadScene(sceneId) {
+            const scene = story[sceneId];
+            if (!scene) {
+                console.error("Escena no encontrada:", sceneId);
+                return;
+            }
+
+            const storyText = document.getElementById('story-text');
+            const choicesContainer = document.getElementById('choices-container');
+            
+            // Animación para el texto
+            storyText.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+            setTimeout(() => {
+                storyText.textContent = scene.text;
+                storyText.classList.remove('opacity-0');
+            }, 250);
+
+            choicesContainer.innerHTML = '';
+            
+            if (scene.choices && scene.choices.length > 0) {
+                scene.choices.forEach(choice => {
+                    const button = document.createElement('button');
+                    button.textContent = choice.text;
+                    button.className = 'w-full px-6 py-4 bg-gray-800 text-indigo-400 font-bold rounded-xl shadow-lg border-2 border-indigo-500 hover:bg-indigo-500 hover:text-white focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50';
+                    button.onclick = () => loadScene(choice.nextSceneId);
+                    choicesContainer.appendChild(button);
+                });
+            } else {
+                const endMessage = document.createElement('p');
+                endMessage.textContent = "Fin de la historia. ¡Gracias por jugar!";
+                endMessage.className = 'text-center text-2xl font-bold mt-8 text-indigo-400';
+                choicesContainer.appendChild(endMessage);
+
+                const restartButton = document.createElement('button');
+                restartButton.textContent = "Reiniciar juego";
+                restartButton.className = 'w-1/2 mx-auto mt-6 px-6 py-4 bg-gray-800 text-indigo-400 font-bold rounded-xl shadow-lg border-2 border-indigo-500 hover:bg-indigo-500 hover:text-white focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50';
+                restartButton.onclick = () => loadScene('start');
+                choicesContainer.appendChild(restartButton);
+            }
+        }
+
+        window.onload = () => {
+            loadScene(currentSceneId);
+        };
+    </script>
+</body>
+</html>
