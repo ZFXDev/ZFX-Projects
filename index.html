@@ -1,132 +1,86 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZFX Projects</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            background-color: #f0f2f5;
-            color: #333;
-            display: flex; /* Use flexbox for overall layout */
-            flex-direction: column; /* Stack header, nav, and iframe vertically */
-            min-height: 100vh; /* Ensure body takes full viewport height */
-        }
-        header {
-            background-color: #333;
-            color: white;
-            padding: 1rem;
-            text-align: center;
-            flex-shrink: 0; /* Prevent header from shrinking */
-        }
-        nav {
-            background-color: #444;
-            padding: 0.5rem;
-            text-align: center;
-            flex-shrink: 0; /* Prevent nav from shrinking */
-            display: flex; /* Use flexbox for navigation links */
-            flex-wrap: wrap; /* Allow links to wrap on smaller screens */
-            justify-content: center; /* Center links */
-            gap: 0.5rem; /* Space between links */
-        }
-        nav a {
-            color: white;
-            text-decoration: none;
-            padding: 0.5rem 1rem; /* Adjust padding for better mobile touch targets */
-            border-radius: 5px;
-            transition: background-color 0.3s;
-            flex-grow: 1; /* Allow links to grow to fill space */
-            text-align: center; /* Center text within each link */
-            min-width: 100px; /* Ensure a minimum width for touch */
-        }
-        nav a:hover, .nav-link.active {
-            background-color: #555;
-        }
-        #content-frame {
-            width: 100%;
-            flex-grow: 1; /* Allow iframe to take up remaining vertical space */
-            border: none;
-            display: block;
-            height: auto; /* Allow height to adjust based on content and flex-grow */
-        }
+  <meta charset="UTF-8">
+  <title>Validation</title>
+  <style>
+    body {
+      display: flex;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+      font-family: sans-serif;
+    }
 
-        /* --- Media Queries for smaller screens --- */
-        @media (max-width: 768px) {
-            nav {
-                flex-direction: column; /* Stack nav links vertically on small screens */
-                align-items: stretch; /* Make links fill the width */
-            }
-            nav a {
-                margin: 0.2rem 0; /* Reduce vertical margin between stacked links */
-                padding: 0.8rem 1rem; /* Increase vertical padding for easier tapping */
-            }
-        }
+    form {
+      text-align: left;
+    }
 
-        /* --- Fallback/Message for very small screens if needed --- */
-        /*
-        .mobile-message {
-            display: none;
-            text-align: center;
-            padding: 20px;
-            background-color: #ffe0b2;
-            color: #e65100;
-            margin: 20px;
-            border-radius: 8px;
-        }
-
-        @media (max-width: 480px) {
-            body > *:not(.mobile-message) {
-                display: none; // Hide main content
-            }
-            .mobile-message {
-                display: block; // Show message
-            }
-        }
-        */
-    </style>
+    .error {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
+  <form id="registroForm">
+    <h1>Cuenta</h1>
 
-    <header>
-        <h1>ZFX Projects</h1>
-    </header>
+    <label for="nombre">Nombre y Apellido:</label><br>
+    <input type="text" id="nombre" name="nombre" required><br><br>
 
-    <nav>
-        <a href="javascript:void(0);" class="nav-link" onclick="loadContent('news.html', this)">Novedades</a>
-        <a href="javascript:void(0);" class="nav-link" onclick="loadContent('projects.html', this)">Proyectos</a>
-        <a href="javascript:void(0);" class="nav-link" onclick="loadContent('others.html', this)">Otros</a>
-    </nav>
+    <label for="edad">Edad:</label><br>
+    <input type="number" id="edad" name="edad" required><br><br>
 
-    <iframe id="content-frame" src="juegos.html"></iframe>
+    <button type="submit">Sign Up</button>
+    <button type="button" id="loginBtn">Log In</button>
+    <button type="button" onclick="window.location.href='hub.html'">Guest</button>
+    <div class="error" id="errorMsg"></div>
+  </form>
 
-    <script>
-        function loadContent(page, element) {
-            // Change the page displayed in the iframe
-            document.getElementById('content-frame').src = page;
+  <script>
+    const form = document.getElementById('registroForm');
+    const errorMsg = document.getElementById('errorMsg');
+    const loginBtn = document.getElementById('loginBtn');
 
-            // Manage the 'active' class to highlight the current link
-            const links = document.querySelectorAll('.nav-link');
-            links.forEach(link => link.classList.remove('active'));
-            element.classList.add('active');
-        }
+    form.addEventListener('submit', function(event) {
+      event.preventDefault();
 
-        // Load initial content and activate the first link
-        document.addEventListener('DOMContentLoaded', () => {
-            // Find the link that corresponds to the initial iframe src, or default to the first
-            const initialSrc = document.getElementById('content-frame').src.split('/').pop(); // Get just the filename
-            let initialLink = document.querySelector(`.nav-link[onclick*="${initialSrc}"]`);
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
 
-            if (!initialLink) {
-                // If the initial src doesn't match any link, just click the first one
-                initialLink = document.querySelector('.nav-link');
-            }
-            if (initialLink) {
-                initialLink.click();
-            }
-        });
-    </script>
+      const nombre = document.getElementById('nombre').value.trim();
+      const edad = parseInt(document.getElementById('edad').value, 10);
 
+      if (isNaN(edad) || edad < 16) {
+        errorMsg.textContent = "Debes ser mayor de 16.";
+      } else {
+        errorMsg.textContent = "";
+        alert("Bienvenido, " + nombre + "!");
+        form.reset();
+      }
+    });
+
+    loginBtn.addEventListener('click', function() {
+      // Validar campos obligatorios antes de redirigir
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const nombre = document.getElementById('nombre').value.trim();
+      const edad = parseInt(document.getElementById('edad').value, 10);
+
+      if (isNaN(edad) || edad < 16) {
+        errorMsg.textContent = "Debes ser mayor de 16.";
+      } else {
+        errorMsg.textContent = "";
+        // Redirigir solo si todo está bien
+        window.location.href = 'hub.html';
+      }
+    });
+  </script>
 </body>
 </html>
